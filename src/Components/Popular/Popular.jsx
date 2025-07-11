@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import './Popular.css';
-
+import { Link } from 'react-router-dom';
 function Popular() {
   const [og, setOg] = useState([]);
 
@@ -28,7 +28,7 @@ function Popular() {
       <div className="popular-item">
         {og.map((item) => (
           <div key={item.id} className="popular-card">
-            <img src={item.image} alt={item.name} />
+            <Link to={`/product/${item.id}`}><img src={item.image} alt={item.name} /></Link>
             <h3>{item.name}</h3>
             <p>
               ₹{item.new_price}{' '}

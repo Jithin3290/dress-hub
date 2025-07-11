@@ -3,7 +3,6 @@ import "./Navbar.css"
 import { Link } from 'react-router-dom'
 function Navbar() {
     const [menu,setMenu] = useState("shop")
-
   return (
     <nav className='navbar' >
         <div className="nav-logo">
