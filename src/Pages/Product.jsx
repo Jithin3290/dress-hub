@@ -1,16 +1,29 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ShopContext from '../Context/ShopContext';
 import { useParams } from 'react-router-dom';
-import { createContext } from 'react';
+import CartContext from '../Context/CartContext';
+import toast, { Toaster } from 'react-hot-toast';
+
 function Product() {
+  const { cartItems, setCartItems } = useContext(CartContext);
   const products = useContext(ShopContext);
   const { id } = useParams();
 
 
   const og = products.find(item => item.id == id);
+  function handle() {
+    setCartItems(prev => ({
+      ...prev,
+      [id]: (prev[id] || 0) + 1
+    }));
+    toast.success("Added to cart successfully");
+  }
+  
+
   return (
     <div className="max-w-7xl mx-auto p-6">
-  
+          <Toaster position="top-center" reverseOrder={false} />
+
       <div className="flex flex-col md:flex-row gap-10">
         <div className="flex md:flex-col gap-4">
           {[...Array(4)].map((_, i) => (
@@ -65,7 +78,7 @@ function Product() {
           </div>
 
           <div className="flex gap-4 mt-4 p-2">
-            <button  className=" bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700">
+            <button  onClick={ handle} className=" bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700">
               ADD TO CART
             </button>
             <button className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
@@ -74,6 +87,7 @@ function Product() {
           </div>
         </div>
       </div>
+
     </div>
   );
 }

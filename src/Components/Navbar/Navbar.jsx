@@ -1,28 +1,63 @@
-import React, { useState } from 'react'
-import "./Navbar.css"
-import { Link } from 'react-router-dom'
-function Navbar() {
-    const [menu,setMenu] = useState("shop")
-  return (
-    <nav className='navbar' >
-        <div className="nav-logo">
-        <img src="/product/logo.png" alt="logo image" />
+import React, { useContext, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import CartContext from '../../Context/CartContext';
+import WishlistContext from '../../Context/WishlistContext';
 
-            <p>DressHub</p>
-        </div>
-        <ul className="nav-menu">
-            <li onClick={()=>setMenu("shop")}><Link to = "/" style={{textDecoration: "none"}}>Shop</Link> {menu === "shop"?<hr/>:<></>}</li>
-            <li onClick={()=>setMenu("mens")}><Link to = "/mens" style={{textDecoration: "none"}}>Men</Link> {menu === "mens"?<hr/>:<></>}</li>
-            <li onClick={()=>setMenu("womens")}><Link to = "/womens" style={{textDecoration: "none"}}>Women</Link> {menu === "womens"?<hr/>:<></>}</li>
-            <li onClick={()=>setMenu("kids")}> <Link to = "/kids" style={{textDecoration: "none"}}>Kids</Link> {menu === "kids"?<hr/>:<></>}</li>
-        </ul>
-        <div className="nav-login-cart">
-            <Link to="/login" style={{textDecoration: "none"}}><button>LogIn</button></Link>
-            <Link to="/cart" style={{textDecoration: "none"}}><img src="/product/cart_icon.png" alt="cart_icon" /></Link>
-            <div className="nav-cart-count">5</div>
-        </div>
+function Navbar() {
+  const { cartItems } = useContext(CartContext);
+  const { wish } = useContext(WishlistContext);
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  return (
+    <nav className="bg-white shadow-md px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+      <div className="flex items-center gap-2">
+        <img src="/product/logo.png" alt="logo" className="w-10 h-10" />
+        <p className="text-2xl font-bold text-pink-600">DressHub</p>
+      </div>
+
+      <ul className="flex items-center gap-6 text-gray-700 font-medium">
+        <li className={currentPath === '/' ? 'text-pink-600 border-b-2 border-pink-600' : ''}>
+          <Link to="/">Shop</Link>
+        </li>
+        <li className={currentPath === '/mens' ? 'text-pink-600 border-b-2 border-pink-600' : ''}>
+          <Link to="/mens">Men</Link>
+        </li>
+        <li className={currentPath === '/womens' ? 'text-pink-600 border-b-2 border-pink-600' : ''}>
+          <Link to="/womens">Women</Link>
+        </li>
+        <li className={currentPath === '/kids' ? 'text-pink-600 border-b-2 border-pink-600' : ''}>
+          <Link to="/kids">Kids</Link>
+        </li>
+      </ul>
+
+      <div className="flex items-center gap-4">
+        <Link to="/wish" className="relative text-xl">
+          ❤️
+          {wish.length > 0 && (
+            <span className="absolute -top-2 -right-2 text-xs bg-pink-500 text-white rounded-full px-1">
+              {wish.length}
+            </span>
+          )}
+        </Link>
+
+        <Link to="/cart" className="relative">
+          <img src="/product/cart_icon.png" alt="cart" className="w-6 h-6" />
+          {Object.keys(cartItems).length > 0 && (
+            <span className="absolute -top-2 -right-2 text-xs bg-green-500 text-white rounded-full px-1">
+              {Object.keys(cartItems).length}
+            </span>
+          )}
+        </Link>
+
+        <Link to="/Signup">
+          <button className="bg-pink-600 text-white px-4 py-1 rounded hover:bg-pink-700">
+            Login
+          </button>
+        </Link>
+      </div>
     </nav>
-  )
+  );
 }
 
-export default Navbar
+export default Navbar;

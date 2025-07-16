@@ -6,15 +6,22 @@ import Shopcategory from './Pages/Shopcategory';
 import Shop from './Pages/shop';
 import Product from './Pages/Product';
 import Cart from './Pages/Cart';
-import LoginSignup from './Pages/LoginSignup';
+import Signup from './Pages/Signup';
 import Footer from './Components/Footer/Footer';
 import ShopContext from './Context/ShopContext';
 import axios from 'axios';
 import Men from './Components/Men/Men';
 import Women from './Components/Women/Women';
 import Kids from './Components/Kids/Kids';
+import CartContext from './Context/CartContext';
+import WishList from './Pages/WishList';
+import WishlistContext from './Context/WishlistContext';
+import Login from './Pages/Login';
 function App() {
   const [data, setData] = useState([]); 
+  const [cartItems, setCartItems] = useState([]);
+  const [wish, setWish] = useState([]);
+
 
   useEffect(() => {
     async function Collection() {
@@ -30,6 +37,10 @@ function App() {
   }, []);
 
   return (
+    <WishlistContext.Provider value={{wish,setWish}}>
+    <CartContext.Provider value={{ cartItems, setCartItems }}>
+
+
     <ShopContext.Provider value={data}>
       <BrowserRouter>
         <Navbar />
@@ -41,11 +52,17 @@ function App() {
           <Route path='product/:id' element={<Product />} >
           </Route>
           <Route path='/cart' element={<Cart />} />
-          <Route path='/login' element={<LoginSignup />} />
+          <Route path='/Signup' element={<Signup />} />
+          <Route path='/login' element={<Login />} />
+
+          <Route path='/wish' element={<WishList />} />
+
         </Routes>
-        <Footer />
       </BrowserRouter>
+      <Footer />
     </ShopContext.Provider>
+    </CartContext.Provider>
+    </WishlistContext.Provider>
   );
 }
 
