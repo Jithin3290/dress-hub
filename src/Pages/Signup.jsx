@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 
 function Signup() {
   const navigate = useNavigate();
@@ -9,31 +11,62 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
 
-  const handleSubmit = (e) => {
+  const validateEmail = (email) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !email || !password || !agree) {
-      alert("invalid input")
-      return
-    };
+    if (!name.trim() || name.length < 3) {
+      toast.error("Name must be at least 3 characters");
+      return;
+    }
 
-    
+    if (!validateEmail(email)) {
+      toast.error("Enter a valid email address");
+      return;
+    }
 
     if (password.length < 6) {
-      alert("password must be 6 character")
-      return
-     };
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
 
-    alert('Signed up successfully!');
+    if (!agree) {
+      toast.error("You must agree to the terms");
+      return;
+    }
 
-    navigate('/login');
+    try {
+      const existing = await axios.get(`http://localhost:3000/user?email=${email}`);
+      if (existing.data.length > 0) {
+        toast.error("Email already registered");
+        return;
+      }
+
+      await axios.post("http://localhost:3000/user", {
+        name,
+        email,
+        password,
+        login: false,
+        cart: {},       
+        wish: []
+      });
+
+      toast.success("Signed up successfully!");
+      setTimeout(() => navigate('/login'), 1000);
+    } catch (err) {
+      toast.error("Signup failed. Please try again.");
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-pink-100">
+      <Toaster position="top-center" reverseOrder={false} />
+
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-lg w-full max-w-md shadow"
+        className="bg-white p-6 rounded-lg w-full max-w-md shadow-md"
       >
         <h1 className="text-2xl font-bold text-center mb-4">Sign Up</h1>
 
@@ -42,7 +75,7 @@ function Signup() {
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full p-3 mb-3 border rounded"
+          className="w-full p-3 mb-3 border rounded focus:outline-pink-400"
         />
 
         <input
@@ -50,7 +83,7 @@ function Signup() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 mb-3 border rounded"
+          className="w-full p-3 mb-3 border rounded focus:outline-pink-400"
         />
 
         <input
@@ -58,7 +91,7 @@ function Signup() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 mb-3 border rounded"
+          className="w-full p-3 mb-3 border rounded focus:outline-pink-400"
         />
 
         <div className="flex items-center gap-2 text-sm mb-3">
@@ -76,6 +109,13 @@ function Signup() {
         >
           Sign Up
         </button>
+
+        <Link
+          to="/login"
+          className="block text-center text-sm text-pink-600 mt-4 hover:underline"
+        >
+          Already have an account?
+        </Link>
       </form>
     </div>
   );

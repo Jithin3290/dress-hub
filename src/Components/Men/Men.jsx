@@ -6,14 +6,20 @@ import { Link } from 'react-router-dom';
 function Men() {
   const products = useContext(ShopContext); 
   const { wish, setWish } = useContext(WishlistContext);
-
+  const auth = JSON.parse(sessionStorage.getItem("user"));
+  
   const toggleWishlist = (id) => {
+    if(auth && auth.login == true){
     if (wish.includes(id)) {
       setWish(prev => prev.filter(pid => pid !== id));
     } else {
       setWish(prev => [...prev, id]);
+    }}
+    else{
+      alert("pleae log in")
     }
   };
+
 
 
   const menProducts = products.filter(item => item.category === "men");

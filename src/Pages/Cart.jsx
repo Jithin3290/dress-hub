@@ -1,47 +1,81 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import CartContext from '../Context/CartContext';
 import ShopContext from '../Context/ShopContext';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import axios from 'axios';
 
 function Cart() {
   const data = useContext(ShopContext);
   const { cartItems, setCartItems } = useContext(CartContext);
+  const nav = useNavigate();
 
-  
+  const getUser = () => JSON.parse(sessionStorage.getItem("user"));
+  const auth = getUser();
 
   const cart = data.filter(product => cartItems[product.id]);
-console.log(cartItems);
+
+  // 🔄 Sync cart to DB + session
+  const syncCartToUser = async (updatedCart) => {
+    const freshAuth = getUser();
+    if (freshAuth?.id) {
+      try {
+        await axios.patch(`http://localhost:3000/user/${freshAuth.id}`, {
+          cart: updatedCart,
+        });
+
+        sessionStorage.setItem("user", JSON.stringify({ ...freshAuth, cart: updatedCart }));
+      } catch (err) {
+        console.error("Failed to sync cart to user:", err);
+      }
+    }
+  };
+
+  // 🔁 Load cart from sessionStorage once on mount
+  useEffect(() => {
+    if (auth?.cart) {
+      setCartItems(auth.cart);
+    }
+  }, []);
+
   const increment = (id) => {
-    setCartItems(prev => ({
-      ...prev,
-      [id]: (prev[id] || 1) + 1,
-    }));
+    const updated = {
+      ...cartItems,
+      [id]: (cartItems[id] || 1) + 1
+    };
+    setCartItems(updated);
+    syncCartToUser(updated);
   };
 
   const decrement = (id) => {
-    setCartItems(prev => {
-      if (prev[id] <= 1) {
-        const updated = { ...prev };
-        delete updated[id];
-        return updated;
-      }
-      return {
-        ...prev,
-        [id]: prev[id] - 1,
-      };
-    });
+    let updated = { ...cartItems };
+    if (updated[id] <= 1) {
+      delete updated[id];
+    } else {
+      updated[id] -= 1;
+    }
+    setCartItems(updated);
+    syncCartToUser(updated);
   };
 
   const removeItem = (id) => {
-    setCartItems(prev => {
-      const updated = { ...prev };
-      delete updated[id];
-      return updated;
-    });
+    const updated = { ...cartItems };
+    delete updated[id];
+    setCartItems(updated);
+    syncCartToUser(updated);
   };
 
   const total = cart.reduce((sum, item) => {
     return sum + item.new_price * cartItems[item.id];
   }, 0);
+
+  const handleBuyNow = () => {
+    if (!auth) {
+      toast.error("Please login to continue");
+      return;
+    }
+    nav("/order");
+  };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -60,7 +94,9 @@ console.log(cartItems);
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <button onClick={() => decrement(item.id)} className="px-2 py-1 border">-</button>
+                {cartItems[item.id] > 1 && (
+                  <button onClick={() => decrement(item.id)} className="px-2 py-1 border">-</button>
+                )}
                 <span>{cartItems[item.id]}</span>
                 <button onClick={() => increment(item.id)} className="px-2 py-1 border">+</button>
                 <button onClick={() => removeItem(item.id)} className="ml-3 text-red-500">Remove</button>
@@ -69,7 +105,12 @@ console.log(cartItems);
           ))}
           <div className="text-right mt-6 border-t pt-4">
             <h2 className="text-xl font-semibold">Total: ${total}</h2>
-            <button className="mt-4 px-6 py-2 bg-blue-600 text-white rounded">Buy Now</button>
+            <button
+              onClick={handleBuyNow}
+              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Buy Now
+            </button>
           </div>
         </>
       )}

@@ -6,12 +6,17 @@ import WishlistContext from '../../Context/WishlistContext';
 function Kid() {
   const products = useContext(ShopContext); 
   const { wish, setWish } = useContext(WishlistContext);
+  const auth = JSON.parse(sessionStorage.getItem("user"))
 
   const toggleWishlist = (id) => {
+    if(auth && auth.login == true){
     if (wish.includes(id)) {
       setWish(prev => prev.filter(pid => pid !== id));
     } else {
       setWish(prev => [...prev, id]);
+    }}
+    else{
+      alert("please login")
     }
   };
 
