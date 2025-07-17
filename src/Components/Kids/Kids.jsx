@@ -2,21 +2,34 @@ import React, { useContext } from 'react';
 import ShopContext from '../../Context/ShopContext';
 import { Link } from 'react-router-dom';
 import WishlistContext from '../../Context/WishlistContext';
+import toast, { Toaster } from 'react-hot-toast';
+import axios from 'axios';
 
 function Kid() {
   const products = useContext(ShopContext); 
   const { wish, setWish } = useContext(WishlistContext);
-  const auth = JSON.parse(sessionStorage.getItem("user"))
+  const auth = JSON.parse(sessionStorage.getItem("user"));
 
-  const toggleWishlist = (id) => {
-    if(auth && auth.login == true){
-    if (wish.includes(id)) {
-      setWish(prev => prev.filter(pid => pid !== id));
+  const toggleWishlist = async (id) => {
+    if (auth && auth.login === true) {
+      let updatedWishlist;
+      if (wish.includes(id)) {
+        updatedWishlist = wish.filter(pid => pid !== id);
+      } else {
+        updatedWishlist = [...wish, id];
+      }
+
+      setWish(updatedWishlist);
+
+      try {
+        await axios.patch(`http://localhost:3000/user/${auth.id}`, {
+          wishlist: updatedWishlist
+        });
+      } catch (error) {
+        console.error("Failed to sync wishlist with server:", error);
+      }
     } else {
-      setWish(prev => [...prev, id]);
-    }}
-    else{
-      alert("please login")
+      toast.error("Please login");
     }
   };
 
@@ -24,6 +37,7 @@ function Kid() {
 
   return ( 
     <div>
+      <Toaster position="top-center" reverseOrder={false} />
       <img src="/product/banner_kids.png" alt="banner" />
       <h1 className="text-center p-10 text-xl font-bold mb-4">Kid's Collection</h1>
       

@@ -49,12 +49,13 @@ function Signup() {
         email,
         password,
         login: false,
-        cart: {},       
-        wish: []
+        cart: [],       
+        wish: [],
+        order:[]
       });
 
       toast.success("Signed up successfully!");
-      setTimeout(() => navigate('/login'), 1000);
+      navigate('/login')
     } catch (err) {
       toast.error("Signup failed. Please try again.");
     }

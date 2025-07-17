@@ -386,16 +386,95 @@
       "login": true
     },
     {
-      "id": "9160",
-      "name": "jithin",
+      "id": "adb6",
+      "name": "jithi@gmail.com",
       "email": "jithi@gmail.com",
-      "password": "222222",
+      "password": "jithi@gmail.com",
       "login": true,
       "cart": {
-        "6": 5,
-        "13": 5,
-        "31": 1
-      }
+        "10": 1,
+        "33": 1,
+        "34": 1
+      },
+      "wish": [
+        "33",
+        "36"
+      ],
+      "order": [
+        "25",
+        "5",
+        15,
+        21,
+        "19",
+        23,
+        "24",
+        24,
+        33,
+        34,
+        "17",
+        "9",
+        10,
+        13
+      ]
+    },
+    {
+      "id": "f144",
+      "name": "add",
+      "email": "add@gmail.com",
+      "password": "add@gmail.com",
+      "login": true,
+      "cart": {
+        "18": 3,
+        "23": 3
+      },
+      "wish": [],
+      "order": [
+        13,
+        17,
+        19,
+        2,
+        26,
+        "15",
+        "11",
+        18,
+        23
+      ]
+    },
+    {
+      "id": "bdc3",
+      "name": "jaggu",
+      "email": "jaggu@gmail.com",
+      "password": "jaggu@gmail.com",
+      "login": true,
+      "cart": {
+        "1": 1,
+        "14": 2,
+        "17": 1,
+        "23": 1,
+        "26": 1,
+        "30": 1
+      },
+      "wish": [
+        "25",
+        "26",
+        "1",
+        "2"
+      ],
+      "order": [
+        "14",
+        "26",
+        "23",
+        1,
+        14,
+        17,
+        23,
+        26,
+        30
+      ],
+      "wishlist": [
+        "25",
+        "26"
+      ]
     }
   ]
 }

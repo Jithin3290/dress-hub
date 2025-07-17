@@ -2,30 +2,32 @@ import React, { useContext } from 'react';
 import ShopContext from '../../Context/ShopContext';
 import WishlistContext from '../../Context/WishlistContext';
 import { Link } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 
 function Women() {
   const products = useContext(ShopContext);
   const { wish, setWish } = useContext(WishlistContext);
-  const auth = JSON.parse(sessionStorage.getItem("user"))
+  const auth = JSON.parse(sessionStorage.getItem("user"));
+
   const toggleWishlist = (id) => {
-    if(auth && auth.login == true){
-    if (wish.includes(id)) {
-      setWish(prev => prev.filter(pid => pid !== id));
+    if (auth && auth.login === true) {
+      if (Array.isArray(wish) && wish.includes(id)) {
+        setWish(prev => prev.filter(pid => pid !== id));
+      } else {
+        setWish(prev => [...(Array.isArray(prev) ? prev : []), id]);
+      }
     } else {
-      setWish(prev => [...prev, id]);
+      toast.error("Please login");
     }
-  }
-  else{
-    alert("login please")
-  }
   };
 
   const womenProducts = products.filter(item => item.category === "women");
 
   return (
     <div>
-      <img src="/product/banner_women.png" alt="banner" />
+      <Toaster position="top-center" reverseOrder={false} />
 
+      <img src="/product/banner_women.png" alt="banner" />
       <h1 className="text-center p-10 text-xl font-bold mb-4">Women's Collection</h1>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -35,7 +37,7 @@ function Women() {
               onClick={() => toggleWishlist(product.id)}
               className="absolute top-2 right-2 text-xl"
             >
-              {wish.includes(product.id) ? '❤️' : '🤍'}
+              {Array.isArray(wish) && wish.includes(product.id) ? '❤️' : '🤍'}
             </button>
 
             <Link to={`/product/${product.id}`}>

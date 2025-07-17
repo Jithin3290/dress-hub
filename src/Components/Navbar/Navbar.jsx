@@ -11,16 +11,16 @@ function Navbar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const authUser = JSON.parse(sessionStorage.getItem("user"));
+    const authUser = JSON.parse(sessionStorage.getItem('user'));
     setUser(authUser?.login ? authUser : null);
   }, []);
 
   const handleLogout = () => {
-    sessionStorage.removeItem("user");
-    setCartItems({});   // 🧹 Clear cart
-    setWish([]);        // 🧹 Clear wishlist
     setUser(null);
-    navigate("/");
+    
+    sessionStorage.removeItem('user');
+    setCartItems({}); 
+    navigate('/');
   };
 
   const activeClass = 'text-pink-600 border-b-2 border-pink-600';
@@ -46,7 +46,7 @@ function Navbar() {
 
         <Link to="/wish" className="relative text-xl">
           ❤️
-          {wish.length > 0 && (
+          {wish?.length > 0 && (
             <span className="absolute -top-2 -right-2 text-xs bg-pink-500 text-white rounded-full px-1">
               {wish.length}
             </span>

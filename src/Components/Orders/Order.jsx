@@ -1,94 +1,67 @@
-import React, { useContext } from 'react';
-import OrderContext from '../../Context/OrderContext';
-import ShopContext from '../../Context/ShopContext';
-import CartContext from '../../Context/CartContext';
+import React, { useContext, useEffect, useState } from "react";
+import axios from "axios";
+import OrderContext from "../../Context/OrderContext";
+import ShopContext from "../../Context/ShopContext";
 
 function Order() {
-  const data = useContext(ShopContext);
-  const { order } = useContext(OrderContext);
-  const { cartItems } = useContext(CartContext);
+  const { order, setOrder } = useContext(OrderContext);
+  const products = useContext(ShopContext);
+  const [orderedProducts, setOrderedProducts] = useState([]);
+  const user = JSON.parse(sessionStorage.getItem("user"));
 
-  const cartOrderedItems = data.filter(item => cartItems[item.id]);
+  useEffect(() => {
+    async function fetchOrderData() {
+      if (user && user.id) {
+        try {
+          const res = await axios.get(`http://localhost:3000/user/${user.id}`);
+          const userOrder = res.data.order || [];
+          setOrder(userOrder);
+        } catch (err) {
+          console.error("Failed to fetch order:", err);
+        }
+      }
+    }
 
-  const buyNowItems = data.filter(item => order.includes(item.id));
+    fetchOrderData();
+  }, [user?.id, setOrder]);
 
-  const total = [
-    ...cartOrderedItems.map(item => item.new_price * cartItems[item.id]),
-    ...buyNowItems.map(item => item.new_price),
-  ].reduce((a, b) => a + b, 0);
+  useEffect(() => {
+    if (products.length > 0 && order.length > 0) {
+      const normalizedOrder = order.map((id) => Number(id));
+      const filtered = products.filter((item) =>
+        normalizedOrder.includes(Number(item.id))
+      );
+      setOrderedProducts(filtered);
+    } else {
+      setOrderedProducts([]);
+    }
+  }, [order, products]);
+
+  if (!user || !user.login) {
+    return <p className="text-center mt-10 text-lg">Please log in to see your orders.</p>;
+  }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">Your Orders</h1>
+    <div className="max-w-6xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">Your Orders</h1>
 
-      {cartOrderedItems.length === 0 && buyNowItems.length === 0 ? (
-        <p className="text-center text-gray-600">No orders found.</p>
+      {orderedProducts.length === 0 ? (
+        <p className="text-gray-600">No orders yet.</p>
       ) : (
-        <>
-          {cartOrderedItems.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4">Cart Items</h2>
-              {cartOrderedItems.map(item => (
-                <div
-                  key={item.id}
-                  className="bg-white rounded-xl shadow-md p-4 mb-4 flex gap-6 items-center"
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-24 h-24 object-cover rounded-md border"
-                  />
-                  <div className="flex-1">
-                    <h2 className="text-xl font-semibold">{item.name}</h2>
-                    <p className="text-gray-600 mt-1">Price: ₹{item.new_price}</p>
-                    <p className="text-gray-600">Quantity: {cartItems[item.id]}</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Total: ₹{item.new_price * cartItems[item.id]}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="px-3 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm font-medium">
-                      Pending
-                    </span>
-                  </div>
-                </div>
-              ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {orderedProducts.map((item) => (
+            <div key={item.id} className="border rounded-lg p-4 shadow-sm">
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-full h-48 object-cover rounded-md"
+              />
+              <h2 className="text-lg font-semibold mt-2">{item.name}</h2>
+              <p className="text-gray-500 line-through">${item.old_price}</p>
+              <p className="text-green-600 font-bold">${item.new_price}</p>
             </div>
-          )}
-
-          {buyNowItems.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4">Buy Now Items</h2>
-              {buyNowItems.map(item => (
-                <div
-                  key={`buy-${item.id}`}
-                  className="bg-white rounded-xl shadow-md p-4 mb-4 flex gap-6 items-center"
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-24 h-24 object-cover rounded-md border"
-                  />
-                  <div className="flex-1">
-                    <h2 className="text-xl font-semibold">{item.name}</h2>
-                    <p className="text-gray-600 mt-1">Price: ₹{item.new_price}</p>
-                    <p className="text-sm text-gray-500 mt-1">Quantity: 1</p>
-                    <p className="text-sm text-gray-500 mt-1">Total: ₹{item.new_price}</p>
-                  </div>
-                  <div>
-                    <span className="px-3 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm font-medium">
-                      Pending
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="text-right mt-6 border-t pt-4">
-            <h2 className="text-xl font-semibold">Total Price: ₹{total}</h2>
-          </div>
-        </>
+          ))}
+        </div>
       )}
     </div>
   );

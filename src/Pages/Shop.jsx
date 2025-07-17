@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import Hero from '../Components/Navbar/Hero/Hero'
 import Popular from '../Components/Popular/Popular'
-import Offer from '../Components/Offers/Offer'
 import NewsLetter from '../Components/NewsLetter/NewsLetter'
 import Footer from '../Components/Footer/Footer'
 import NewCollections from '../Components/NewCollections/NewCollections'

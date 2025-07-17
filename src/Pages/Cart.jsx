@@ -4,12 +4,12 @@ import ShopContext from '../Context/ShopContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-
+import CartOrderContext from '../Context/CartOrderContext';
 function Cart() {
   const data = useContext(ShopContext);
   const { cartItems, setCartItems } = useContext(CartContext);
   const nav = useNavigate();
-
+  const {cartOrder,setCartOrder} = useContext(CartOrderContext)
   const getUser = () => JSON.parse(sessionStorage.getItem("user"));
   const auth = getUser();
 
@@ -35,6 +35,7 @@ function Cart() {
   useEffect(() => {
     if (auth?.cart) {
       setCartItems(auth.cart);
+      
     }
   }, []);
 
@@ -69,13 +70,38 @@ function Cart() {
     return sum + item.new_price * cartItems[item.id];
   }, 0);
 
-  const handleBuyNow = () => {
-    if (!auth) {
-      toast.error("Please login to continue");
-      return;
-    }
+  const handleBuyNow = async () => {
+  if (!auth) {
+    toast.error("Please login to continue");
+    return;
+  }
+
+  const freshAuth = getUser();
+
+  // Merge previous orders + current cart item ids (only keys)
+  const cartIds = Object.keys(freshAuth.cart || {}).map(Number);
+  const existingOrder = freshAuth.order || [];
+  const updatedOrder = [...new Set([...existingOrder, ...cartIds])];
+
+  try {
+    // PATCH to update order in DB
+    await axios.patch(`http://localhost:3000/user/${freshAuth.id}`, {
+      order: updatedOrder,
+    });
+
+    // Update session
+    sessionStorage.setItem("user", JSON.stringify({ ...freshAuth, order: updatedOrder }));
+
+    // Also update cartOrder context to show on order page
+    setCartOrder(freshAuth.cart);
+
+    // Navigate to order page
     nav("/order");
-  };
+  } catch (err) {
+    console.error("Failed to update order:", err);
+    toast.error("Could not place order. Try again.");
+  }
+};
 
   return (
     <div className="p-6 max-w-4xl mx-auto">

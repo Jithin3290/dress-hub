@@ -2,32 +2,46 @@ import React, { useContext } from 'react';
 import ShopContext from '../../Context/ShopContext';
 import WishlistContext from '../../Context/WishlistContext';
 import { Link } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
+import axios from 'axios';
 
 function Men() {
-  const products = useContext(ShopContext); 
+  const products = useContext(ShopContext);
   const { wish, setWish } = useContext(WishlistContext);
   const auth = JSON.parse(sessionStorage.getItem("user"));
-  
-  const toggleWishlist = (id) => {
-    if(auth && auth.login == true){
-    if (wish.includes(id)) {
-      setWish(prev => prev.filter(pid => pid !== id));
+
+  const toggleWishlist = async (id) => {
+    if (auth && auth.login === true) {
+      let updatedWishlist;
+
+      if (Array.isArray(wish) && wish.includes(id)) {
+        updatedWishlist = wish.filter(pid => pid !== id);
+      } else {
+        updatedWishlist = Array.isArray(wish) ? [...wish, id] : [id];
+      }
+
+      // Update local state
+      setWish(updatedWishlist);
+
+      // Sync with JSON server
+      try {
+        await axios.patch(`http://localhost:3000/user/${auth.id}`, {
+          wishlist: updatedWishlist
+        });
+      } catch (error) {
+        console.error("Failed to update wishlist on server:", error);
+      }
     } else {
-      setWish(prev => [...prev, id]);
-    }}
-    else{
-      alert("pleae log in")
+      toast.error("Please login");
     }
   };
-
-
 
   const menProducts = products.filter(item => item.category === "men");
 
   return (
     <div>
+      <Toaster position="top-center" reverseOrder={false} />
       <img src="/product/banner_mens.png" alt="banner" />
-
       <h1 className="text-center p-10 text-xl font-bold mb-4">Men's Collection</h1>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -37,7 +51,7 @@ function Men() {
               onClick={() => toggleWishlist(product.id)}
               className="absolute top-2 right-2 text-xl"
             >
-              {wish.includes(product.id) ? '❤️' : '🤍'}
+              {(Array.isArray(wish) ? wish : []).includes(product.id) ? '❤️' : '🤍'}
             </button>
 
             <Link to={`/product/${product.id}`}>
