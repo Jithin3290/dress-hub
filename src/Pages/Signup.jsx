@@ -49,6 +49,7 @@ function Signup() {
         email,
         password,
         login: false,
+        isAdmin: false,
         cart: [],       
         wish: [],
         order:[]

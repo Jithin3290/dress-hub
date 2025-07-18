@@ -1,65 +1,69 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
-import CartContext from '../Context/CartContext';
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { setCartItems } = useContext(CartContext);
   const navigate = useNavigate();
 
- const handleLogin = async (e) => {
-  e.preventDefault();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  if (!email || !password) {
-    toast.error("Email and password are required");
-    return;
-  }
+  const validateEmail = (email) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  try {
-    const res = await axios.get(`http://localhost:3000/user?email=${email}&password=${password}`);
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-    if (res.data.length > 0) {
-      const user = res.data[0];
+    if (!validateEmail(email)) {
+      toast.error("Enter a valid email");
+      return;
+    }
 
-      // ✅ Step 1: Check if admin by email/password
-      const isAdmin = email === 'admin@gmail.com' && password === '123454321';
+    if (!password.trim()) {
+      toast.error("Password is required");
+      return;
+    }
 
-      // ✅ Step 2: Update login & admin status on server
-      await axios.patch(`http://localhost:3000/user/${user.id}`, {
-        login: true,
-        isAdmin: isAdmin,
-      });
+    try {
+      const [userRes, adminRes] = await Promise.all([
+        axios.get(`http://localhost:3000/user?email=${email}`),
+        axios.get(`http://localhost:3000/admin?email=${email}`)
+      ]);
 
-      // ✅ Step 3: Save in sessionStorage
-      const updatedUser = { ...user, login: true, isAdmin: isAdmin };
-      sessionStorage.setItem("user", JSON.stringify(updatedUser));
+      const user = userRes.data[0];
+      const admin = adminRes.data[0];
 
-      toast.success("Login successful!");
-
-      // ✅ Step 4: Navigate based on isAdmin
-      if (isAdmin) {
-        navigate('/admin',{ replace: true });
-      } else {
-        navigate('/',{ replace: true });
+      // Admin login logic
+      if (admin && admin.password === password) {
+        await axios.patch(`http://localhost:3000/admin/${admin.id}`, { login: true });
+        const updatedAdmin = { ...admin, login: true };
+        sessionStorage.setItem("user", JSON.stringify(updatedAdmin));
+        toast.success("Admin login successful");
+        navigate("/admin");
+        return;
       }
 
-    } else {
-      toast.error("Invalid email or password");
-    }
-  } catch (err) {
-    toast.error("Login failed. Try again.");
-    console.error(err);
-  }
-};
+      // Normal user login logic
+      if (!user || user.password !== password) {
+        toast.error("Invalid email or password");
+        return;
+      }
 
+      await axios.patch(`http://localhost:3000/user/${user.id}`, { login: true });
+      const updatedUser = { ...user, login: true };
+      sessionStorage.setItem("user", JSON.stringify(updatedUser));
+      toast.success("Login successful");
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      toast.error("Login failed. Please try again.");
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-pink-100">
       <Toaster position="top-center" reverseOrder={false} />
-
       <form
         onSubmit={handleLogin}
         className="bg-white p-6 rounded-lg w-full max-w-md shadow-md"
@@ -93,7 +97,7 @@ function Login() {
           to="/signup"
           className="block text-center text-sm text-pink-600 mt-4 hover:underline"
         >
-          Don't have an account? Sign up
+          Don't have an account? Sign Up
         </Link>
       </form>
     </div>

@@ -8,7 +8,6 @@ export const WishlistProvider = ({ children }) => {
   const [userId, setUserId] = useState(null);
   const isFirstLoad = useRef(true); // Prevents first render from syncing
 
-  // Load wishlist from sessionStorage when component mounts
   useEffect(() => {
     const storedUser = JSON.parse(sessionStorage.getItem('user'));
     if (storedUser?.login) {
@@ -17,14 +16,12 @@ export const WishlistProvider = ({ children }) => {
     }
   }, []);
 
-  // Prevent sync on first load
   useEffect(() => {
     if (userId) {
       isFirstLoad.current = false;
     }
   }, [userId]);
 
-  // Sync wishlist to JSON server only if it has changed
   useEffect(() => {
     if (!userId || isFirstLoad.current) return;
 
@@ -37,7 +34,7 @@ export const WishlistProvider = ({ children }) => {
         if (isDifferent) {
           await axios.patch(`http://localhost:3000/user/${userId}`, { wish });
 
-          // update sessionStorage too
+          // Update sessionStorage
           const user = JSON.parse(sessionStorage.getItem('user'));
           const updatedUser = { ...user, wish };
           sessionStorage.setItem('user', JSON.stringify(updatedUser));
@@ -48,7 +45,7 @@ export const WishlistProvider = ({ children }) => {
     };
 
     syncWishlist();
-  }, [wish]);
+  }, [wish, userId]);
 
   return (
     <WishlistContext.Provider value={{ wish, setWish }}>

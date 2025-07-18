@@ -3,31 +3,24 @@ import ShopContext from '../../Context/ShopContext';
 import { Link } from 'react-router-dom';
 import WishlistContext from '../../Context/WishlistContext';
 import toast, { Toaster } from 'react-hot-toast';
-import axios from 'axios';
 
 function Kid() {
   const products = useContext(ShopContext); 
   const { wish, setWish } = useContext(WishlistContext);
   const auth = JSON.parse(sessionStorage.getItem("user"));
 
-  const toggleWishlist = async (id) => {
+  const toggleWishlist = (id) => {
     if (auth && auth.login === true) {
       let updatedWishlist;
       if (wish.includes(id)) {
         updatedWishlist = wish.filter(pid => pid !== id);
+        toast.success("Removed from wishlist");
       } else {
         updatedWishlist = [...wish, id];
+        toast.success("Added to wishlist");
       }
 
       setWish(updatedWishlist);
-
-      try {
-        await axios.patch(`http://localhost:3000/user/${auth.id}`, {
-          wishlist: updatedWishlist
-        });
-      } catch (error) {
-        console.error("Failed to sync wishlist with server:", error);
-      }
     } else {
       toast.error("Please login");
     }

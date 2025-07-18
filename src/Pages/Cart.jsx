@@ -1,144 +1,141 @@
-import { useContext, useEffect } from 'react';
-import CartContext from '../Context/CartContext';
+import React, { useContext, useEffect, useState } from 'react';
+import OrderContext from '../Context/OrderContext';
 import ShopContext from '../Context/ShopContext';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import CartContext from '../Context/CartContext';
 import axios from 'axios';
-import CartOrderContext from '../Context/CartOrderContext';
+import toast, { Toaster } from 'react-hot-toast';
+
 function Cart() {
-  const data = useContext(ShopContext);
+  const data = useContext(ShopContext); // All products
   const { cartItems, setCartItems } = useContext(CartContext);
-  const nav = useNavigate();
-  const {cartOrder,setCartOrder} = useContext(CartOrderContext)
-  const getUser = () => JSON.parse(sessionStorage.getItem("user"));
-  const auth = getUser();
+  const { setOrder } = useContext(OrderContext);
 
-  const cart = data.filter(product => cartItems[product.id]);
+  const [user, setUser] = useState(null);
+  const [total, setTotal] = useState(0);
 
-  // 🔄 Sync cart to DB + session
-  const syncCartToUser = async (updatedCart) => {
-    const freshAuth = getUser();
-    if (freshAuth?.id) {
-      try {
-        await axios.patch(`http://localhost:3000/user/${freshAuth.id}`, {
-          cart: updatedCart,
-        });
-
-        sessionStorage.setItem("user", JSON.stringify({ ...freshAuth, cart: updatedCart }));
-      } catch (err) {
-        console.error("Failed to sync cart to user:", err);
-      }
-    }
-  };
-
-  // 🔁 Load cart from sessionStorage once on mount
   useEffect(() => {
-    if (auth?.cart) {
-      setCartItems(auth.cart);
-      
-    }
+    const u = JSON.parse(sessionStorage.getItem("user"));
+    setUser(u);
   }, []);
 
-  const increment = (id) => {
-    const updated = {
-      ...cartItems,
-      [id]: (cartItems[id] || 1) + 1
-    };
-    setCartItems(updated);
-    syncCartToUser(updated);
+  useEffect(() => {
+    let t = 0;
+    cartItems.forEach((item) => {
+      const p = data.find((prod) => prod.id === item.id);
+      if (p) {
+        t += p.new_price * item.quantity;
+      }
+    });
+    setTotal(t);
+  }, [cartItems, data]);
+
+  const syncCart = async (newCart) => {
+    setCartItems(newCart);
+    const updatedUser = { ...user, cart: newCart };
+    sessionStorage.setItem("user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
+    await axios.patch(`http://localhost:3000/user/${user.id}`, {
+      cart: newCart,
+    });
   };
 
-  const decrement = (id) => {
-    let updated = { ...cartItems };
-    if (updated[id] <= 1) {
-      delete updated[id];
-    } else {
-      updated[id] -= 1;
-    }
-    setCartItems(updated);
-    syncCartToUser(updated);
+  const handleIncrement = (id) => {
+    const updated = cartItems.map((item) => {
+      if (item.id === id) {
+        if (item.quantity >= 5) {
+          toast.error("You can only add up to 5 items.");
+          return item;
+        }
+        return { ...item, quantity: item.quantity + 1 };
+      }
+      return item;
+    });
+    syncCart(updated);
   };
 
-  const removeItem = (id) => {
-    const updated = { ...cartItems };
-    delete updated[id];
-    setCartItems(updated);
-    syncCartToUser(updated);
+  const handleDecrement = (id) => {
+    const updated = cartItems.map((item) => {
+      if (item.id === id) {
+        if (item.quantity <= 1) {
+          toast.error("Minimum quantity is 1.");
+          return item;
+        }
+        return { ...item, quantity: item.quantity - 1 };
+      }
+      return item;
+    });
+    syncCart(updated);
   };
 
-  const total = cart.reduce((sum, item) => {
-    return sum + item.new_price * cartItems[item.id];
-  }, 0);
+  const handleRemove = (id) => {
+    const updated = cartItems.filter((item) => item.id !== id);
+    syncCart(updated);
+    toast.success("Item removed from cart");
+  };
 
   const handleBuyNow = async () => {
-  if (!auth) {
-    toast.error("Please login to continue");
-    return;
-  }
+    const newOrder = [...cartItems];
+    const updatedUser = { ...user, order: [...(user.order || []), ...newOrder], cart: [] };
+    setUser(updatedUser);
+    sessionStorage.setItem("user", JSON.stringify(updatedUser));
+    setCartItems([]);
+    setOrder((prev) => [...prev, ...newOrder]);
 
-  const freshAuth = getUser();
-
-  // Merge previous orders + current cart item ids (only keys)
-  const cartIds = Object.keys(freshAuth.cart || {}).map(Number);
-  const existingOrder = freshAuth.order || [];
-  const updatedOrder = [...new Set([...existingOrder, ...cartIds])];
-
-  try {
-    // PATCH to update order in DB
-    await axios.patch(`http://localhost:3000/user/${freshAuth.id}`, {
-      order: updatedOrder,
+    await axios.patch(`http://localhost:3000/user/${user.id}`, {
+      cart: [],
+      order: updatedUser.order,
     });
 
-    // Update session
-    sessionStorage.setItem("user", JSON.stringify({ ...freshAuth, order: updatedOrder }));
-
-    // Also update cartOrder context to show on order page
-    setCartOrder(freshAuth.cart);
-
-    // Navigate to order page
-    nav("/order");
-  } catch (err) {
-    console.error("Failed to update order:", err);
-    toast.error("Could not place order. Try again.");
-  }
-};
+    toast.success("Order placed successfully!");
+  };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-center">Your Cart</h1>
-      {cart.length === 0 ? (
-        <p className="text-center text-gray-600">Your cart is empty.</p>
+    <div className="cart-container p-4">
+      <Toaster position="top-right" />
+      <h2 className="text-2xl font-bold mb-4">Your Cart</h2>
+
+      {cartItems.length === 0 ? (
+        <p>Your cart is empty.</p>
       ) : (
-        <>
-          {cart.map(item => (
-            <div key={item.id} className="flex justify-between items-center border p-4 mb-4 rounded">
-              <div className="flex items-center gap-4">
-                <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded" />
-                <div>
-                  <h2 className="font-semibold">{item.name}</h2>
-                  <p className="text-green-600">${item.new_price}</p>
+        cartItems.map((item) => {
+          const prod = data.find((p) => p.id === item.id);
+          if (!prod) return null;
+
+          return (
+            <div key={item.id} className="cart-item flex gap-4 items-center mb-4 shadow-md p-4 rounded-lg">
+              <img src={prod.image} alt={prod.name} className="w-20 h-20 object-cover rounded" />
+              <div className="flex-1">
+                <h3 className="font-semibold">{prod.name}</h3>
+                <p>₹{prod.new_price} x {item.quantity}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  {/* 👇 Conditional rendering for - button */}
+                  {item.quantity > 1 && (
+                    <button onClick={() => handleDecrement(item.id)} className="px-2 py-1 bg-gray-200 rounded">-</button>
+                  )}
+                  <span className="font-bold">{item.quantity}</span>
+                  {/* 👇 Conditional rendering for + button */}
+                  {item.quantity < 5 && (
+                    <button onClick={() => handleIncrement(item.id)} className="px-2 py-1 bg-gray-200 rounded">+</button>
+                  )}
+                  <button onClick={() => handleRemove(item.id)} className="ml-4 text-red-500">Remove</button>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                {cartItems[item.id] > 1 && (
-                  <button onClick={() => decrement(item.id)} className="px-2 py-1 border">-</button>
-                )}
-                <span>{cartItems[item.id]}</span>
-                <button onClick={() => increment(item.id)} className="px-2 py-1 border">+</button>
-                <button onClick={() => removeItem(item.id)} className="ml-3 text-red-500">Remove</button>
-              </div>
+              <p className="font-semibold">₹{prod.new_price * item.quantity}</p>
             </div>
-          ))}
-          <div className="text-right mt-6 border-t pt-4">
-            <h2 className="text-xl font-semibold">Total: ${total}</h2>
-            <button
-              onClick={handleBuyNow}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Buy Now
-            </button>
-          </div>
-        </>
+          );
+        })
+      )}
+
+      {cartItems.length > 0 && (
+        <div className="cart-summary mt-6">
+          <h3 className="text-xl font-bold">Total: ₹{total}</h3>
+          <button
+            onClick={handleBuyNow}
+            className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          >
+            Buy Now
+          </button>
+        </div>
       )}
     </div>
   );

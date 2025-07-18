@@ -317,6 +317,18 @@
       "image": "/product/product_4.png",
       "new_price": 100,
       "old_price": 150
+    },
+    {
+      "id": "3244",
+      "name": "Jacket",
+      "image": "https://www.freepik.com/free-photo/young-handsome-man-walking-down-street_10703933.htm#fromView=keyword&page=1&position=0&uuid=7635f884-2f7a-41e9-a8d4-8ad8887e73de&query=Leather+Jacket",
+      "new_price": "120"
+    },
+    {
+      "id": "15fd",
+      "name": "Baby fork",
+      "image": "https://staranddaisy.in/product/staranddaisy-girls-party-dresses-premium-serires-blue-ds0816/",
+      "new_price": "123"
     }
   ],
   "new_collections": [
@@ -379,39 +391,73 @@
   ],
   "user": [
     {
-      "id": "admin123",
-      "name": "Admin",
-      "email": "admin@gmail.com",
-      "password": "123454321",
-      "login": true,
-      "isAdmin": true,
-      "cart": {
-        "2": 1
-      }
-    },
-    {
-      "id": "6cd5",
-      "name": "Jithi",
-      "email": "aaa@gmail.com",
-      "password": "111111",
-      "login": false,
-      "cart": {},
-      "wish": [],
-      "order": []
-    },
-    {
       "id": "aedd",
       "name": "jaggu@gmail.com",
       "email": "jaggu@gmail.com",
       "password": "jaggu@gmail.com",
       "login": true,
-      "cart": [],
-      "wish": [],
-      "order": [],
-      "wishlist": [
-        "25"
+      "cart": [
+        {
+          "id": "34",
+          "quantity": 1,
+          "date": "2025-07-18"
+        }
       ],
-      "isAdmin": false
+      "order": [
+        {
+          "id": "18",
+          "quantity": 1,
+          "date": "2025-07-18"
+        },
+        {
+          "id": "2",
+          "quantity": 1,
+          "date": "2025-07-18"
+        },
+        {
+          "id": "26",
+          "quantity": 1,
+          "date": "2025-07-18"
+        }
+      ],
+      "wish": [
+        "2",
+        "1"
+      ]
+    },
+    {
+      "id": "4bcf",
+      "name": "jithi",
+      "email": "jithi@gmail.com",
+      "password": "jithi@gmail.com",
+      "login": true,
+      "isAdmin": false,
+      "cart": [
+        {
+          "id": "15",
+          "quantity": 5,
+          "date": "2025-07-18"
+        }
+      ],
+      "wish": [
+        "14"
+      ],
+      "order": [
+        {
+          "id": "25",
+          "quantity": 1,
+          "date": "2025-07-18"
+        }
+      ]
+    }
+  ],
+  "admin": [
+    {
+      "id": "admin123",
+      "name": "Admin",
+      "email": "admin@gmail.com",
+      "password": "123454321",
+      "login": false
     }
   ]
 }

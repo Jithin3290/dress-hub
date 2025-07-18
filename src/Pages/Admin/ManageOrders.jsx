@@ -23,29 +23,30 @@ function ManageOrders() {
   const getProductById = (id) => products.find((p) => Number(p.id) === Number(id));
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">All Orders</h2>
+    <div className="p-4">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">All Orders</h2>
       {users.map((user) => (
-        <div key={user.id} className="mb-6 p-4 bg-white rounded shadow">
-          <h3 className="font-bold text-lg mb-2">{user.name}'s Orders</h3>
+        <div key={user.id} className="mb-8 p-4 bg-white rounded-lg shadow-md">
+          <h3 className="text-xl font-semibold mb-4 text-blue-600">{user.name}'s Orders</h3>
           {user.order && user.order.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {user.order.map((orderId) => {
-                const product = getProductById(orderId);
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {user.order.map((orderItem, index) => {
+                const product = getProductById(orderItem.id);
                 return product ? (
-                  <div
-                    key={orderId}
-                    className="border p-3 rounded shadow-sm bg-gray-50"
-                  >
+                  <div key={index} className="bg-gray-50 border rounded-lg p-4 shadow-sm">
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-40 object-contain mb-2"
+                      className="w-full h-40 object-contain mb-3 rounded"
                     />
-                    <p className="font-semibold">{product.name}</p>
+                    <h4 className="text-lg font-semibold">{product.name}</h4>
                     <p className="text-green-600 font-bold">₹{product.new_price}</p>
+                    <p className="text-sm text-gray-600">Quantity: {orderItem.quantity}</p>
+                    <p className="text-sm text-gray-600">Ordered on: {orderItem.date}</p>
                   </div>
-                ) : null;
+                ) : (
+                  <p key={index} className="text-red-500">Product not found (ID: {orderItem.id})</p>
+                );
               })}
             </div>
           ) : (
