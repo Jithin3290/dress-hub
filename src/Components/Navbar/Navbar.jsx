@@ -14,7 +14,6 @@ function Navbar() {
     const authUser = JSON.parse(sessionStorage.getItem('user'));
     setUser(authUser?.login ? authUser : null);
   }, []);
-
   const handleLogout = () => {
     setUser(null);
     

@@ -379,102 +379,39 @@
   ],
   "user": [
     {
+      "id": "admin123",
+      "name": "Admin",
+      "email": "admin@gmail.com",
+      "password": "123454321",
+      "login": true,
+      "isAdmin": true,
+      "cart": {
+        "2": 1
+      }
+    },
+    {
       "id": "6cd5",
-      "name": "jithi ",
+      "name": "Jithi",
       "email": "aaa@gmail.com",
       "password": "111111",
-      "login": true
-    },
-    {
-      "id": "adb6",
-      "name": "jithi@gmail.com",
-      "email": "jithi@gmail.com",
-      "password": "jithi@gmail.com",
-      "login": true,
-      "cart": {
-        "10": 1,
-        "33": 1,
-        "34": 1
-      },
-      "wish": [
-        "33",
-        "36"
-      ],
-      "order": [
-        "25",
-        "5",
-        15,
-        21,
-        "19",
-        23,
-        "24",
-        24,
-        33,
-        34,
-        "17",
-        "9",
-        10,
-        13
-      ]
-    },
-    {
-      "id": "f144",
-      "name": "add",
-      "email": "add@gmail.com",
-      "password": "add@gmail.com",
-      "login": true,
-      "cart": {
-        "18": 3,
-        "23": 3
-      },
+      "login": false,
+      "cart": {},
       "wish": [],
-      "order": [
-        13,
-        17,
-        19,
-        2,
-        26,
-        "15",
-        "11",
-        18,
-        23
-      ]
+      "order": []
     },
     {
-      "id": "bdc3",
-      "name": "jaggu",
+      "id": "aedd",
+      "name": "jaggu@gmail.com",
       "email": "jaggu@gmail.com",
       "password": "jaggu@gmail.com",
       "login": true,
-      "cart": {
-        "1": 1,
-        "14": 2,
-        "17": 1,
-        "23": 1,
-        "26": 1,
-        "30": 1
-      },
-      "wish": [
-        "25",
-        "26",
-        "1",
-        "2"
-      ],
-      "order": [
-        "14",
-        "26",
-        "23",
-        1,
-        14,
-        17,
-        23,
-        26,
-        30
-      ],
+      "cart": [],
+      "wish": [],
+      "order": [],
       "wishlist": [
-        "25",
-        "26"
-      ]
+        "25"
+      ],
+      "isAdmin": false
     }
   ]
 }

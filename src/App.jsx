@@ -20,7 +20,10 @@ import OrderContext from './Context/OrderContext';
 import Order from './Components/Orders/Order';
 import CartOrderContext from './Context/CartOrderContext';
 import { WishlistProvider } from './Context/WishlistContext';
-
+import ProtectedRouter from './Components/ProtectedRoute/ProtectedRouter';
+import ProtectedLogin from './Components/ProtectedRoute/ProrectedLogin';
+import AdminDashboard from './Pages/Admin/AdminDashboard';
+import ProtectedAdminRoute from './Components/ProtectedRoute/ProtectedAdminRoute';
 function App() {
   const [data, setData] = useState([]);
   const [cartItems, setCartItems] = useState({});
@@ -55,18 +58,21 @@ function App() {
           <CartContext.Provider value={{ cartItems, setCartItems }}>
             <ShopContext.Provider value={data}>
               <BrowserRouter>
-                <Navbar />
+                {!(JSON.parse(sessionStorage.getItem("user"))?.isAdmin) && <Navbar />}
+
                 <Routes>
-                  <Route path='/signup' element={<Signup />} />
-                  <Route path='/login' element={<Login />} />
+                  <Route path='/signup' element={<ProtectedLogin><Signup /></ProtectedLogin>} />
+                  <Route path='/login' element={<ProtectedLogin><Login /></ProtectedLogin>} />
                   <Route path='/' element={<Shop />} />
                   <Route path='/mens' element={<Men />} />
                   <Route path='/womens' element={<Women />} />
                   <Route path='/kids' element={<Kids />} />
                   <Route path='/product/:id' element={<Product />} />
-                  <Route path='/cart' element={<Cart />} />
-                  <Route path='/order' element={<Order />} />
-                  <Route path='/wish' element={<WishList />} />
+                  <Route path='/cart' element={<ProtectedRouter><Cart /></ProtectedRouter>} />
+                  <Route path='/order' element={<ProtectedRouter><Order /></ProtectedRouter>} />
+                  <Route path='/wish' element={<ProtectedRouter><WishList /></ProtectedRouter>} />
+                  <Route path="/admin" element={< ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+
                 </Routes>
               </BrowserRouter>
             </ShopContext.Provider>

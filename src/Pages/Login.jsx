@@ -10,40 +10,51 @@ function Login() {
   const { setCartItems } = useContext(CartContext);
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+ const handleLogin = async (e) => {
+  e.preventDefault();
 
-    if (!email || !password) {
-      toast.error("Email and password are required");
-      return;
-    }
+  if (!email || !password) {
+    toast.error("Email and password are required");
+    return;
+  }
 
-    try {
-      const res = await axios.get(`http://localhost:3000/user?email=${email}&password=${password}`);
+  try {
+    const res = await axios.get(`http://localhost:3000/user?email=${email}&password=${password}`);
 
-      if (res.data.length > 0) {
-        const user = res.data[0];
+    if (res.data.length > 0) {
+      const user = res.data[0];
 
-        // Mark as logged in in the DB
-        await axios.patch(`http://localhost:3000/user/${user.id}`, { login: true });
+      // ✅ Step 1: Check if admin by email/password
+      const isAdmin = email === 'admin@gmail.com' && password === '123454321';
 
-        // Sync cart to context if exists
-        const userCart = user.cart || {};
-        setCartItems(userCart);
+      // ✅ Step 2: Update login & admin status on server
+      await axios.patch(`http://localhost:3000/user/${user.id}`, {
+        login: true,
+        isAdmin: isAdmin,
+      });
 
-        // Save to sessionStorage
-        sessionStorage.setItem("user", JSON.stringify({ ...user, login: true, cart: userCart }));
+      // ✅ Step 3: Save in sessionStorage
+      const updatedUser = { ...user, login: true, isAdmin: isAdmin };
+      sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
-        toast.success("Logged in successfully!");
-        navigate('/');
+      toast.success("Login successful!");
+
+      // ✅ Step 4: Navigate based on isAdmin
+      if (isAdmin) {
+        navigate('/admin',{ replace: true });
       } else {
-        toast.error("Invalid email or password");
+        navigate('/',{ replace: true });
       }
-    } catch (err) {
-      toast.error("Login failed. Try again.");
-      console.error(err);
+
+    } else {
+      toast.error("Invalid email or password");
     }
-  };
+  } catch (err) {
+    toast.error("Login failed. Try again.");
+    console.error(err);
+  }
+};
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-pink-100">

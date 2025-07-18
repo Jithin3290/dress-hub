@@ -55,7 +55,7 @@ function WishList() {
       <h1 className="text-2xl font-bold mb-6 text-center">Your Wishlist</h1>
 
       {loading ? (
-        <p className="text-center text-gray-500">Loading wishlist...</p>
+        <p className="text-center text-gray-500">Log in to see wishlist</p>
       ) : wishedProducts.length === 0 ? (
         <p className="text-center text-gray-600">No items in wishlist.</p>
       ) : (

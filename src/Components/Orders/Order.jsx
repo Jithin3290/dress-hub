@@ -57,7 +57,6 @@ function Order() {
                 className="w-full h-48 object-cover rounded-md"
               />
               <h2 className="text-lg font-semibold mt-2">{item.name}</h2>
-              <p className="text-gray-500 line-through">${item.old_price}</p>
               <p className="text-green-600 font-bold">${item.new_price}</p>
             </div>
           ))}
