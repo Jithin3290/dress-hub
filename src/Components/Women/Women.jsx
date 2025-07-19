@@ -3,14 +3,15 @@ import ShopContext from '../../Context/ShopContext';
 import WishlistContext from '../../Context/WishlistContext';
 import { Link } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
+import AuthContext from '../../Context/AuthContext';
 
 function Women() {
   const products = useContext(ShopContext);
   const { wish, setWish } = useContext(WishlistContext);
-  const auth = JSON.parse(sessionStorage.getItem("user"));
+  const {user}=useContext(AuthContext)
 
   const toggleWishlist = (id) => {
-    if (auth && auth.login === true) {
+    if (user && user.login === true) {
       // Just update local context; PATCH happens in Wishlist.jsx
       if (Array.isArray(wish) && wish.includes(id)) {
         setWish(prev => prev.filter(pid => pid !== id));

@@ -398,32 +398,63 @@
       "login": true,
       "cart": [
         {
-          "id": "34",
+          "id": "15",
           "quantity": 1,
-          "date": "2025-07-18"
+          "date": "2025-07-19"
+        },
+        {
+          "id": "1",
+          "quantity": 2,
+          "date": "2025-07-19"
+        },
+        {
+          "id": "18",
+          "quantity": 1,
+          "date": "2025-07-19"
+        },
+        {
+          "id": "30",
+          "quantity": 3,
+          "date": "2025-07-19"
+        },
+        {
+          "id": "35",
+          "quantity": 1,
+          "date": "2025-07-19"
         }
       ],
       "order": [
         {
+          "id": "15",
+          "quantity": 1,
+          "date": "19/07/2025, 13:10:05"
+        },
+        {
+          "id": "1",
+          "quantity": 2,
+          "date": "19/07/2025, 13:10:05"
+        },
+        {
           "id": "18",
           "quantity": 1,
-          "date": "2025-07-18"
+          "date": "19/07/2025, 13:10:05"
         },
         {
-          "id": "2",
-          "quantity": 1,
-          "date": "2025-07-18"
+          "id": "30",
+          "quantity": 3,
+          "date": "19/07/2025, 13:10:05"
         },
         {
-          "id": "26",
+          "id": "35",
           "quantity": 1,
-          "date": "2025-07-18"
+          "date": "19/07/2025, 13:10:05"
         }
       ],
       "wish": [
-        "2",
-        "1"
-      ]
+        "1",
+        "14"
+      ],
+      "isAdmin": false
     },
     {
       "id": "4bcf",
@@ -437,16 +468,107 @@
           "id": "15",
           "quantity": 5,
           "date": "2025-07-18"
+        },
+        {
+          "id": "21",
+          "quantity": 1,
+          "date": "2025-07-18"
         }
       ],
       "wish": [
-        "14"
+        "14",
+        "18",
+        "15"
       ],
       "order": [
         {
           "id": "25",
           "quantity": 1,
           "date": "2025-07-18"
+        }
+      ]
+    },
+    {
+      "id": "1016",
+      "name": "qqq",
+      "email": "qqq@gmail.com",
+      "password": "qqq@gmail.com",
+      "login": true,
+      "isAdmin": false,
+      "cart": [],
+      "wish": [
+        "22",
+        "19"
+      ],
+      "order": [
+        {
+          "id": "18",
+          "quantity": 1,
+          "date": "2025-07-18"
+        },
+        {
+          "id": "27",
+          "quantity": 5,
+          "date": "2025-07-18"
+        }
+      ]
+    },
+    {
+      "id": "b731",
+      "name": "Dj Damu",
+      "email": "damu@gmail.com",
+      "password": "damu@gmail.com",
+      "login": true,
+      "isAdmin": false,
+      "cart": [
+        {
+          "id": "27",
+          "quantity": 1,
+          "date": "2025-07-19"
+        },
+        {
+          "id": "31",
+          "quantity": 1,
+          "date": "2025-07-19"
+        },
+        {
+          "id": "3",
+          "quantity": 1,
+          "date": "2025-07-19T14:06:48.698Z"
+        },
+        {
+          "id": "2",
+          "quantity": 1,
+          "date": "2025-07-19"
+        }
+      ],
+      "wish": [
+        "2",
+        "3",
+        "4",
+        "26",
+        "30"
+      ],
+      "order": [
+        {
+          "id": "14",
+          "quantity": 5,
+          "date": "2025-07-19"
+        },
+        {
+          "id": "3",
+          "quantity": 1,
+          "date": "2025-07-19"
+        },
+        {
+          "id": "4",
+          "quantity": 1,
+          "date": "2025-07-19"
+        },
+        {
+          "id": "2",
+          "quantity": 1,
+          "date": "2025-07-19"
         }
       ]
     }
@@ -457,7 +579,8 @@
       "name": "Admin",
       "email": "admin@gmail.com",
       "password": "123454321",
-      "login": false
+      "login": true,
+      "isAdmin": true
     }
   ]
 }

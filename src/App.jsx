@@ -10,33 +10,25 @@ import { ShopProvider } from './Context/ShopContext';
 import Men from './Components/Men/Men';
 import Women from './Components/Women/Women';
 import Kids from './Components/Kids/Kids';
-import CartContext from './Context/CartContext';
+import CartContext, { CartProvider } from './Context/CartContext';
 import WishList from './Pages/WishList';
 import Login from './Pages/Login';
-import OrderContext from './Context/OrderContext';
+import OrderContext, { OrderProvider } from './Context/OrderContext';
 import Order from './Components/Orders/Order';
 import { WishlistProvider } from './Context/WishlistContext';
 import ProtectedRouter from './Components/ProtectedRoute/ProtectedRouter';
 import ProtectedLogin from './Components/ProtectedRoute/ProrectedLogin';
 import AdminDashboard from './Pages/Admin/AdminDashboard';
 import ProtectedAdminRoute from './Components/ProtectedRoute/ProtectedAdminRoute';
+import { AuthProvider } from './Context/AuthContext';
 
 function App() {
-  const [cartItems, setCartItems] = useState([]);
-  const [order, setOrder] = useState([]);
-
-  useEffect(() => {
-    const user = JSON.parse(sessionStorage.getItem("user"));
-    if (user?.login) {
-      if (Array.isArray(user.cart)) setCartItems(user.cart);
-      if (Array.isArray(user.order)) setOrder(user.order);
-    }
-  }, []);
 
   return (
-    <OrderContext.Provider value={{ order, setOrder }}>
+    <AuthProvider>
+    <OrderProvider>
       <WishlistProvider>
-        <CartContext.Provider value={{ cartItems, setCartItems }}>
+        <CartProvider>
           <ShopProvider>
             <BrowserRouter>
               {!JSON.parse(sessionStorage.getItem("user"))?.isAdmin && <Navbar />}
@@ -55,9 +47,10 @@ function App() {
               </Routes>
             </BrowserRouter>
           </ShopProvider>
-        </CartContext.Provider>
+        </CartProvider>
       </WishlistProvider>
-    </OrderContext.Provider>
+    </OrderProvider>
+    </AuthProvider>
   );
 }
 

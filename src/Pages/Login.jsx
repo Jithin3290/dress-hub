@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
+import AuthContext from '../Context/AuthContext';
 
 function Login() {
   const navigate = useNavigate();
+  const { setUser } = useContext(AuthContext);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,25 +36,23 @@ function Login() {
       const user = userRes.data[0];
       const admin = adminRes.data[0];
 
-      // Admin login logic
+      // ✅ Admin login logic
       if (admin && admin.password === password) {
         await axios.patch(`http://localhost:3000/admin/${admin.id}`, { login: true });
-        const updatedAdmin = { ...admin, login: true };
-        sessionStorage.setItem("user", JSON.stringify(updatedAdmin));
+        setUser(admin); // ✅ Pass original admin object
         toast.success("Admin login successful");
         navigate("/admin");
         return;
       }
 
-      // Normal user login logic
+      // ✅ Normal user login logic
       if (!user || user.password !== password) {
         toast.error("Invalid email or password");
         return;
       }
 
       await axios.patch(`http://localhost:3000/user/${user.id}`, { login: true });
-      const updatedUser = { ...user, login: true };
-      sessionStorage.setItem("user", JSON.stringify(updatedUser));
+      setUser(user); // ✅ Pass original user object
       toast.success("Login successful");
       navigate("/");
     } catch (err) {

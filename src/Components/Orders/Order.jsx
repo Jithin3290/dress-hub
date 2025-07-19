@@ -2,12 +2,15 @@ import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import OrderContext from "../../Context/OrderContext";
 import ShopContext from "../../Context/ShopContext";
+import AuthContext from "../../Context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function Order() {
   const { order, setOrder } = useContext(OrderContext);
   const products = useContext(ShopContext);
   const [orderedProducts, setOrderedProducts] = useState([]);
-  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("user")));
+  const {user}=useContext(AuthContext)
+  const navigate=useNavigate()
 
   // Fetch latest order from server
   useEffect(() => {
@@ -80,11 +83,7 @@ function Order() {
   };
 
   if (!user?.login) {
-    return (
-      <p className="text-center mt-10 text-lg">
-        Please log in to see your orders.
-      </p>
-    );
+    navigate("/login")
   }
 
   return (

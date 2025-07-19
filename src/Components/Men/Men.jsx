@@ -3,14 +3,15 @@ import ShopContext from '../../Context/ShopContext';
 import WishlistContext from '../../Context/WishlistContext';
 import { Link } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
+import AuthContext from '../../Context/AuthContext';
 
 function Men() {
   const products = useContext(ShopContext);
   const { wish, setWish } = useContext(WishlistContext);
-  const auth = JSON.parse(sessionStorage.getItem("user"));
+  const{user}=useContext(AuthContext)
 
   const toggleWishlist = (id) => {
-    if (auth && auth.login === true) {
+    if (user && user.login === true) {
       let updatedWishlist;
 
       if (Array.isArray(wish) && wish.includes(id)) {

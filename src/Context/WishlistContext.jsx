@@ -1,51 +1,38 @@
-import React, { createContext, useEffect, useState, useRef } from 'react';
+// src/Context/WishlistContext.js
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
+import AuthContext from './AuthContext';
 
 const WishlistContext = createContext();
 
 export const WishlistProvider = ({ children }) => {
   const [wish, setWish] = useState([]);
-  const [userId, setUserId] = useState(null);
-  const isFirstLoad = useRef(true); // Prevents first render from syncing
+  const {user}=useContext(AuthContext)
 
+  // Load wishlist on login
   useEffect(() => {
-    const storedUser = JSON.parse(sessionStorage.getItem('user'));
-    if (storedUser?.login) {
-      setUserId(storedUser.id);
-      setWish(storedUser.wish || []);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (userId) {
-      isFirstLoad.current = false;
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    if (!userId || isFirstLoad.current) return;
-
-    const syncWishlist = async () => {
-      try {
-        const res = await axios.get(`http://localhost:3000/user/${userId}`);
-        const serverWish = res.data.wish || [];
-
-        const isDifferent = JSON.stringify(serverWish) !== JSON.stringify(wish);
-        if (isDifferent) {
-          await axios.patch(`http://localhost:3000/user/${userId}`, { wish });
-
-          // Update sessionStorage
-          const user = JSON.parse(sessionStorage.getItem('user'));
-          const updatedUser = { ...user, wish };
-          sessionStorage.setItem('user', JSON.stringify(updatedUser));
+    const fetchWish = async () => {
+      if (user?.login) {
+        try {
+          const res = await axios.get(`http://localhost:3000/user/${user.id}`);
+          setWish(res.data.wish || []);
+        } catch (err) {
+          console.error("Failed to fetch wishlist:", err);
         }
-      } catch (err) {
-        console.error('Failed to update wishlist:', err);
+      } else {
+        setWish([]); // clear on logout
       }
     };
+    fetchWish();
+  }, [user]);
 
-    syncWishlist();
-  }, [wish, userId]);
+  // Sync wish to JSON server whenever it changes
+  useEffect(() => {
+    if (user?.login) {
+      axios.patch(`http://localhost:3000/user/${user.id}`, { wish })
+        .catch((err) => console.error("Failed to update wishlist:", err));
+    }
+  }, [wish]);
 
   return (
     <WishlistContext.Provider value={{ wish, setWish }}>

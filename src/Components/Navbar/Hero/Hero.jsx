@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function Hero() {
   return (
@@ -14,7 +15,7 @@ function Hero() {
           <p>for everyone</p>
         </div>
         <div className="flex justify-center lg:justify-start items-center gap-[15px] h-[60px] sm:h-[70px] w-[220px] sm:w-[300px] rounded-[75px] mt-[30px] bg-red-600 text-white text-base sm:text-[20px] font-semibold cursor-pointer hover:bg-red-700 transition">
-          <div className="relative left-10 pt-[6px]">Latest Collections</div>
+          <div className="relative left-10 pt-[6px]"><Link to="/mens">Latest Collections</Link></div>
           <img src="/product/arrow.png" alt="arrow" className="relative left-10 w-4 h-4 sm:w-5 sm:h-5 " />
         </div>
       </div>
