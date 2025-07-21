@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import ShopContext from '../../Context/ShopContext';
 import axios from 'axios';
 import {
   PieChart,
@@ -15,15 +16,31 @@ import {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-function AdminDashboard() {
+function AdminHome() {
   const [admin, setAdmin] = useState(null);
   const [orders, setOrders] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const data = useContext(ShopContext);
+
+  const formatDateToISO = (dateStr) => {
+    if (!dateStr) return '';
+    if (dateStr.includes('/')) {
+      const [day, month, rest] = dateStr.split('/');
+      const [year] = rest.split(',');
+      return `${year.trim()}-${month}-${day}`;
+    }
+    return dateStr.split('T')[0];
+  };
+
+  const getPriceById = (id) => {
+    const product = data.find((p) => p.id === id);
+    return product?.new_price || 0;
+  };
 
   const getCategoryData = () => {
     const categoryMap = {};
-    products.forEach((product) => {
+    data.forEach((product) => {
       categoryMap[product.category] = (categoryMap[product.category] || 0) + 1;
     });
     return Object.keys(categoryMap).map((cat) => ({
@@ -44,6 +61,17 @@ function AdminDashboard() {
     return weeklyData;
   };
 
+  const getTodayEarnings = () => {
+    const today = new Date().toISOString().split('T')[0];
+    return orders
+      .filter((o) => o.date === today)
+      .reduce((sum, o) => sum + o.total, 0);
+  };
+
+  const getTotalEarnings = () => {
+    return orders.reduce((sum, o) => sum + o.total, 0);
+  };
+
   useEffect(() => {
     const loggedIn = JSON.parse(sessionStorage.getItem('user'));
     if (loggedIn?.isAdmin) {
@@ -53,25 +81,46 @@ function AdminDashboard() {
       });
 
       axios.get('http://localhost:3000/user').then((res) => {
-        const allOrders = res.data.flatMap((user) =>
-          user.order.map((o) => ({
-            ...o,
-            userName: user.name,
-            userEmail: user.email,
-          }))
-        );
-        setOrders(allOrders);
-      });
+        const allUsers = res.data;
 
-      axios.get('http://localhost:3000/data').then((res) => {
-        setProducts(res.data);
+        const allOrders = res.data.flatMap((user) =>
+          user.order.map((o) => {
+            const isoDate = formatDateToISO(o.date);
+            const price = getPriceById(o.id);
+            return {
+              ...o,
+              userName: user.name,
+              userEmail: user.email,
+              date: isoDate,
+              price,
+              total: price * (o.quantity || 1),
+            };
+          })
+        );
+
+        setUsers(allUsers);
+        setOrders(allOrders);
       });
 
       setTimeout(() => setLoading(false), 800);
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [data]);
+
+  const recentOrders = [...orders].reverse().slice(0, 5);
+  const categoryData = getCategoryData();
+  const weeklyData = getWeeklyData();
+  const todayEarnings = getTodayEarnings();
+  const totalEarnings = getTotalEarnings();
+
+  const topSelling = data
+    .map((p) => ({
+      ...p,
+      sales: orders.filter((o) => o.id === p.id).reduce((sum, o) => sum + (o.quantity || 1), 0),
+    }))
+    .sort((a, b) => b.sales - a.sales)
+    .slice(0, 6);
 
   if (loading) {
     return (
@@ -89,16 +138,31 @@ function AdminDashboard() {
     );
   }
 
-  const recentOrders = [...orders].reverse().slice(0, 5);
-  const categoryData = getCategoryData();
-  const weeklyData = getWeeklyData();
-
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-blue-600 mb-4">
+        <h1 className="text-3xl font-bold text-blue-600 mb-6">
           Welcome, {admin.name}
         </h1>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <h3 className="text-gray-600">Today’s Earnings</h3>
+            <p className="text-2xl font-bold text-green-500">₹{todayEarnings.toFixed(2)}</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <h3 className="text-gray-600">Total Earnings</h3>
+            <p className="text-2xl font-bold text-blue-500">₹{totalEarnings.toFixed(2)}</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <h3 className="text-gray-600">Total Users</h3>
+            <p className="text-2xl font-bold text-purple-500">{users.length}</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <h3 className="text-gray-600">Total Orders</h3>
+            <p className="text-2xl font-bold text-orange-500">{orders.length}</p>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="bg-white rounded-xl p-4 shadow-md">
@@ -165,9 +229,31 @@ function AdminDashboard() {
             )}
           </div>
         </div>
+
+        <div className="bg-white rounded-xl p-6 shadow-md mt-8">
+          <h2 className="text-2xl font-semibold mb-4 text-blue-700">Top Selling Products</h2>
+          {topSelling.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {topSelling.map((item, i) => (
+                <div key={i} className="bg-gray-50 border border-gray-200 rounded-xl p-4 shadow hover:shadow-lg transition">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-40 object-contain rounded-md mb-3"
+                  />
+                  <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>
+                  <p className="text-sm text-gray-500 mb-1">Price: ₹{item.new_price}</p>
+                  <p className="text-sm text-gray-500">Units Sold: {item.sales}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500">No data available.</p>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-export default AdminDashboard;
+export default AdminHome;

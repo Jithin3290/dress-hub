@@ -9,7 +9,7 @@ function Order() {
   const { order, setOrder } = useContext(OrderContext);
   const products = useContext(ShopContext);
   const [orderedProducts, setOrderedProducts] = useState([]);
-  const {user}=useContext(AuthContext)
+  const {user,setUser}=useContext(AuthContext)
   const navigate=useNavigate()
 
   // Fetch latest order from server

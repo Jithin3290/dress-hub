@@ -1,11 +1,10 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
 
 const ShopContext = createContext();
 
 export const ShopProvider = ({ children }) => {
   const [data, setData] = useState([]);
-
   useEffect(() => {
     const fetchData = async () => {
       try {

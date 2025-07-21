@@ -30,6 +30,22 @@ function ManageUsers() {
     }
   };
 
+  const toggleBlockUser = async (id, isBlocked) => {
+    try {
+      await axios.patch(`http://localhost:3000/user/${id}`, {
+        blocked: !isBlocked,
+      });
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === id ? { ...u, blocked: !isBlocked } : u
+        )
+      );
+    } catch (err) {
+      console.error("Failed to toggle block status", err);
+    }
+  };
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">All Users</h2>
@@ -47,7 +63,17 @@ function ManageUsers() {
               <tr key={user.id} className="border-b">
                 <td className="p-3">{user.name}</td>
                 <td className="p-3">{user.email}</td>
-                <td className="p-3">
+                <td className="p-3 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => toggleBlockUser(user.id, user.blocked)}
+                    className={`px-3 py-1 rounded text-white ${
+                      user.blocked
+                        ? "bg-green-500 hover:bg-green-600"
+                        : "bg-yellow-500 hover:bg-yellow-600"
+                    }`}
+                  >
+                    {user.blocked ? "Unblock" : "Block"}
+                  </button>
                   <button
                     onClick={() => handleDelete(user.id)}
                     className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"

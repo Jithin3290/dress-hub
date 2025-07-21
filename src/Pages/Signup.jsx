@@ -50,6 +50,7 @@ function Signup() {
         password,
         login: false,
         isAdmin: false,
+        blocked: false,
         cart: [],       
         wish: [],
         order:[]

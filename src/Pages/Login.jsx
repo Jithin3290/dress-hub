@@ -37,24 +37,36 @@ function Login() {
       const admin = adminRes.data[0];
 
       // ✅ Admin login logic
-      if (admin && admin.password === password) {
-        await axios.patch(`http://localhost:3000/admin/${admin.id}`, { login: true });
-        setUser(admin); // ✅ Pass original admin object
-        toast.success("Admin login successful");
-        navigate("/admin");
-        return;
+      if (admin) {
+        if (admin.blocked) {
+          toast.error("Admin account is blocked");
+          return;
+        }
+        if (admin.password === password) {
+          await axios.patch(`http://localhost:3000/admin/${admin.id}`, { login: true });
+          setUser(admin);
+          toast.success("Admin login successful");
+          setTimeout(() => navigate("/admin"), 1000);
+          return;
+        }
       }
 
-      // ✅ Normal user login logic
+      // ✅ User login logic
       if (!user || user.password !== password) {
         toast.error("Invalid email or password");
         return;
       }
 
+      if (user.blocked) {
+        toast.error("User account is blocked");
+        return;
+      }
+
       await axios.patch(`http://localhost:3000/user/${user.id}`, { login: true });
-      setUser(user); // ✅ Pass original user object
+      setUser(user);
       toast.success("Login successful");
-      navigate("/");
+      setTimeout(() => navigate("/"), 500);
+
     } catch (err) {
       console.error(err);
       toast.error("Login failed. Please try again.");
