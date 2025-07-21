@@ -28,6 +28,7 @@ function Navbar() {
   const handleLogout = () => {
     toast.success("Logged out");
     sessionStorage.removeItem("user");
+    sessionStorage.removeItem("recentlyWatched");
     setUser(null);
     setShowDropdown(false)
     navigate("/login", { replace: true });

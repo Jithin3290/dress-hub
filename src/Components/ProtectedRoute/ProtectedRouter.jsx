@@ -1,13 +1,21 @@
-import React from 'react'
-import { Navigate,useLocation } from 'react-router-dom'
+import React, { useContext } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import AuthContext from '../../Context/AuthContext';
 
-function ProtectedRouter({children}) {
-    const location = useLocation()
-    const auth = JSON.parse(sessionStorage.getItem("user"))
-    if(!auth){
-        return <Navigate to="/login" state={{from:location}} replace/>
-    }
-  return children
+function ProtectedRoute({ children }) {
+  const { user } = useContext(AuthContext);
+  const location = useLocation();
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // ✅ Only allow users (not admins)
+  if (user.isAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  return children;
 }
 
-export default ProtectedRouter
+export default ProtectedRoute;

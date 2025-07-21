@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import WishlistContext from '../../Context/WishlistContext';
 import toast, { Toaster } from 'react-hot-toast';
 import AuthContext from '../../Context/AuthContext';
+import Footer from '../Footer/Footer';
 
 function Kid() {
   const products = useContext(ShopContext); 
@@ -32,7 +33,6 @@ function Kid() {
   return ( 
     <div>
       <Toaster position="top-center" reverseOrder={false} />
-      <img src="/product/banner_kids.png" alt="banner" />
       <h1 className="text-center p-10 text-xl font-bold mb-4">Kid's Collection</h1>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -57,7 +57,11 @@ function Kid() {
           </div>
         ))}
       </div>
+      <div className='pt-10'>
+      <Footer/>
     </div>
+    </div>
+    
   );
 }
 

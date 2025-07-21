@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
+import useProtectedLoginRedirect from '../Components/ProtectedRoute/useProtectedLoginRedirect';
 
 function Signup() {
+  useProtectedLoginRedirect()
   const navigate = useNavigate();
 
   const [name, setName] = useState('');
@@ -48,7 +50,7 @@ function Signup() {
         name,
         email,
         password,
-        login: false,
+        login: true,
         isAdmin: false,
         blocked: false,
         cart: [],       

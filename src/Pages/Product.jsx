@@ -1,10 +1,12 @@
-import React, { useContext } from "react";
+import React, { useContext,useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ShopContext from "../Context/ShopContext";
 import CartContext from "../Context/CartContext";
 import OrderContext from "../Context/OrderContext";
 import axios from "axios";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
+import Footer from "../Components/Footer/Footer";
+import RecentlyWatchedContext from "../Context/RecentlyWatchedContext";
 
 function Product() {
   const { id } = useParams();
@@ -12,7 +14,7 @@ function Product() {
   const data = useContext(ShopContext);
   const { cartItems, setCartItems } = useContext(CartContext);
   const { order, setOrder } = useContext(OrderContext);
-
+  const { addToRecentlyWatched } = useContext(RecentlyWatchedContext);
   const product = data.find(
     (item) => item.id === parseInt(id) || item.id === id
   );
@@ -46,18 +48,17 @@ function Product() {
     if (!user?.login) return navigate("/signup");
 
     const existingItem = cartItems.find((item) => item.id === product.id);
-    const updatedCart = existingItem
-      ? cartItems.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      : [...cartItems, { id: product.id, quantity: 1, date: getTodayDate() }];
+    if (existingItem) return;
+
+    const updatedCart = [
+      ...cartItems,
+      { id: product.id, quantity: 1, date: getTodayDate() },
+    ];
 
     setCartItems(updatedCart);
     updateUserData(updatedCart);
 
-    toast.success(existingItem ? "Cart updated!" : "Added to cart!");
+    toast.success("Added to cart successfully!");
   };
 
   const handleBuyNow = () => {
@@ -74,9 +75,19 @@ function Product() {
 
     updateUserData(cartItems, updatedOrder);
 
-    toast.success("Order placed!");
-    navigate("/order");
+    setTimeout(() => {
+      navigate("/payment");
+    }, 1500);
   };
+   useEffect(() => {
+    if (product) {
+      addToRecentlyWatched({
+        id: product.id,
+        name: product.name,
+        image: product.image,
+      });
+    }
+  }, [product]);
 
   if (!product) {
     return <p className="text-center mt-10 text-lg">Product not found.</p>;
@@ -84,8 +95,10 @@ function Product() {
 
   const isInCart = cartItems.some((item) => item.id === product.id);
 
-  return (
+  return (<>
     <div className="max-w-5xl mx-auto p-6 mt-4">
+      <Toaster position="top-center" reverseOrder={false} />
+
       <div className="grid md:grid-cols-2 gap-10 bg-white p-6 rounded-lg shadow-lg">
         <img
           src={product.image}
@@ -96,12 +109,14 @@ function Product() {
           <div>
             <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
             <p className="text-gray-500 mb-1 capitalize">{product.category}</p>
-            <p className="line-through text-gray-400">${product.old_price}</p>
+            <p className="line-through text-gray-400">₹{product.old_price}</p>
             <p className="text-2xl text-green-600 font-bold mb-4">
-              ${product.new_price}
+              ₹{product.new_price}
             </p>
             <p className="text-gray-700 mb-6 leading-relaxed">
-              {product.name} is one of our best-selling items. Crafted with premium materials and designed to deliver exceptional comfort and style. Perfect for daily wear or as a special gift.
+              {product.name} is one of our best-selling items. Crafted with
+              premium materials and designed to deliver exceptional comfort and
+              style. Perfect for daily wear or as a special gift.
             </p>
           </div>
 
@@ -131,6 +146,7 @@ function Product() {
         </div>
       </div>
     </div>
+    <Footer/></>
   );
 }
 

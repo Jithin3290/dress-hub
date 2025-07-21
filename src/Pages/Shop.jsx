@@ -3,7 +3,7 @@ import Hero from '../Components/Navbar/Hero/Hero'
 import Popular from '../Components/Popular/Popular'
 import Footer from '../Components/Footer/Footer'
 import NewCollections from '../Components/NewCollections/NewCollections'
-
+import RecentlyWatched from '../Components/RecentlyWatched/RecentlyWatched'
 function Shop() {
   return (
     <div >
@@ -17,6 +17,7 @@ function Shop() {
         <Popular/>
        
         <NewCollections/>
+        <RecentlyWatched/>
         <Footer/>
 
         

@@ -4,6 +4,7 @@ import WishlistContext from '../../Context/WishlistContext';
 import { Link } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import AuthContext from '../../Context/AuthContext';
+import Footer from '../Footer/Footer';
 
 function Women() {
   const products = useContext(ShopContext);
@@ -30,7 +31,6 @@ function Women() {
   return (
     <div>
       <Toaster position="top-center" reverseOrder={false} />
-      <img src="/product/banner_women.png" alt="banner" />
 
       <h1 className="text-center p-10 text-xl font-bold mb-4">Women's Collection</h1>
 
@@ -63,6 +63,9 @@ function Women() {
           </div>
         ))}
       </div>
+      <div className='pt-10'>
+      <Footer/>
+    </div>
     </div>
   );
 }

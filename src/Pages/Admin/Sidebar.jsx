@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import AuthContext from "../../Context/AuthContext";
 
 function Sidebar({ setSection }) {
   const navigate = useNavigate();
-
+  const { setUser } = useContext(AuthContext); 
   const handleLogout = () => {
     sessionStorage.removeItem("user");
+    setUser(null)
     navigate("/login");
   };
 

@@ -3,10 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import AuthContext from '../Context/AuthContext';
-
+import useProtectedLoginRedirect from '../Components/ProtectedRoute/useProtectedLoginRedirect';
 function Login() {
+  useProtectedLoginRedirect()
   const navigate = useNavigate();
-  const { setUser } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,18 +38,21 @@ function Login() {
       const admin = adminRes.data[0];
 
       // ✅ Admin login logic
-      if (admin) {
-        if (admin.blocked) {
-          toast.error("Admin account is blocked");
-          return;
-        }
-        if (admin.password === password) {
-          await axios.patch(`http://localhost:3000/admin/${admin.id}`, { login: true });
-          setUser(admin);
-          toast.success("Admin login successful");
-          setTimeout(() => navigate("/admin"), 1000);
-          return;
-        }
+      if (admin && admin.password === password) {
+        await axios.patch(`http://localhost:3000/admin/${admin.id}`, { login: true });
+
+        // Set user with admin flag
+        const adminWithRole = { ...admin, isAdmin: true };
+        setUser(adminWithRole);
+
+        toast.success("Admin login successful");
+
+        // Clear history and go to /admin
+        setTimeout(() => {
+          window.location.href = "/admin";
+        }, 100);
+
+        return;
       }
 
       // ✅ User login logic
@@ -62,8 +66,8 @@ function Login() {
         return;
       }
 
-      await axios.patch(`http://localhost:3000/user/${user.id}`, { login: true });
-      setUser(user);
+      const u = await axios.patch(`http://localhost:3000/user/${user.id}`, { login: true });
+      setUser({ ...user, isAdmin: false });
       toast.success("Login successful");
       setTimeout(() => navigate("/"), 500);
 

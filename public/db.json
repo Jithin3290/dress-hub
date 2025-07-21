@@ -287,6 +287,14 @@
       "category": "men",
       "new_price": "150",
       "old_price": "200"
+    },
+    {
+      "id": "d0fb",
+      "name": "Good looking Kid Brown shirt",
+      "image": "https://i.pinimg.com/236x/38/4b/da/384bdae017ad78a2c1ce2d803dbdc2ae.jpg",
+      "category": "kid",
+      "new_price": "250",
+      "old_price": "300"
     }
   ],
   "data": [
@@ -453,24 +461,24 @@
       "password": "jithi@gmail.com",
       "login": true,
       "isAdmin": false,
-      "cart": [],
+      "cart": [
+        {
+          "id": "15",
+          "quantity": 1,
+          "date": "2025-07-21"
+        }
+      ],
       "wish": [
-        "14",
-        "18",
-        "15"
+        "14"
       ],
       "order": [
         {
-          "id": "25",
+          "id": "26",
           "quantity": 1,
-          "date": "2025-07-18"
-        },
-        {
-          "id": "21",
-          "quantity": 1,
-          "date": "2025-07-18"
+          "date": "2025-07-21"
         }
-      ]
+      ],
+      "blocked": false
     },
     {
       "id": "1016",
@@ -628,6 +636,155 @@
         },
         {
           "id": "28",
+          "quantity": 1,
+          "date": "2025-07-21"
+        }
+      ]
+    },
+    {
+      "id": "2949",
+      "name": "soman",
+      "email": "soman@gmail.com",
+      "password": "soman@gmail.com",
+      "login": true,
+      "isAdmin": false,
+      "blocked": false,
+      "cart": [
+        {
+          "id": "14",
+          "quantity": 1,
+          "date": "2025-07-21"
+        }
+      ],
+      "wish": [],
+      "order": []
+    },
+    {
+      "id": "f54d",
+      "name": "syam",
+      "email": "syam@gmail.com",
+      "password": "syam@gmail.com",
+      "login": true,
+      "isAdmin": false,
+      "blocked": false,
+      "cart": [],
+      "wish": [],
+      "order": []
+    },
+    {
+      "id": "a8da",
+      "name": "dhamu",
+      "email": "dhamu4@gmail.com",
+      "password": "dhamu4@gmail.com",
+      "login": true,
+      "isAdmin": false,
+      "blocked": false,
+      "cart": [
+        {
+          "id": "1",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "13",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "2",
+          "quantity": 1,
+          "date": "2025-07-21"
+        }
+      ],
+      "wish": [],
+      "order": [
+        {
+          "id": "14",
+          "quantity": 2,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "22",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "23",
+          "quantity": 2,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "14",
+          "quantity": 2,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "4",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "13",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "22",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "33",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "30",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "10",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "1",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "1",
+          "quantity": 5,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "1",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "1",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "31",
+          "quantity": 2,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "34",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "31",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "14",
           "quantity": 1,
           "date": "2025-07-21"
         }

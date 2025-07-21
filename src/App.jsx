@@ -1,6 +1,6 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, useContext } from 'react';
 import './App.css';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from './Components/Navbar/Navbar';
 import Shop from './Pages/Shop';
 import Product from './Pages/Product';
@@ -16,54 +16,85 @@ import Login from './Pages/Login';
 import { OrderProvider } from './Context/OrderContext';
 import Order from './Components/Orders/Order';
 import { WishlistProvider } from './Context/WishlistContext';
+import { RecentlyWatchedProvider } from './Context/RecentlyWatchedContext';
 import AdminDashboard from './Pages/Admin/AdminDashboard';
 import { AuthProvider } from './Context/AuthContext';
 import ScrollToTop from './Scrolltop/Scrolltop';
-import EditProfile from './Components/Navbar/EditProfile/EditProfile';
+import EditProfile from './Components/Navbar/EditProfile/Editprofile';
+import ProtectedRouter from './Components/ProtectedRoute/ProtectedRouter';
+import ProtectedAdminRoute from './Components/ProtectedRoute/ProtectedAdminRoute';
+import AuthContext from './Context/AuthContext';
+import Payment from './Pages/Payment';
 
 // Lazy-loaded components
 const About = lazy(() => import('./Components/Footer/About'));
 const Careers = lazy(() => import('./Components/Footer/Careers'));
 const Contact = lazy(() => import('./Components/Footer/Contact'));
 
+// Wrapper to access useLocation + Admin Redirect
+function AppWrapper() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+
+  // ⛳ Redirect admin user to /admin when at /
+  useEffect(() => {
+    if (user?.isAdmin && location.pathname === '/') {
+      navigate('/admin', { replace: true });
+    }
+  }, [user, location.pathname, navigate]);
+
+  const hideNavbarPaths = ['/login', '/signup', '/admin'];
+  const shouldHideNavbar = hideNavbarPaths.some((path) =>
+    location.pathname.startsWith(path)
+  );
+
+  return (
+    <>
+      {!shouldHideNavbar && <Navbar />}
+      <ScrollToTop />
+      <Suspense fallback={<div className="text-center py-8">Loading...</div>}>
+        <Routes>
+          <Route path='/signup' element={<Signup />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/' element={<Shop />} />
+          <Route path='/about' element={<About />} />
+          <Route path='/careers' element={<Careers />} />
+          <Route path='/contact' element={<Contact />} />
+          <Route path="/edit" element={<EditProfile />} />
+          <Route path='/mens' element={<Men />} />
+          <Route path='/womens' element={<Women />} />
+          <Route path='/kids' element={<Kids />} />
+          <Route path='/product/:id' element={<Product />} />
+          <Route path='/cart' element={<ProtectedRouter><Cart /></ProtectedRouter>} />
+          <Route path='/order' element={<ProtectedRouter><Order /></ProtectedRouter>} />
+          <Route path='/wish' element={<ProtectedRouter><WishList /></ProtectedRouter>} />
+          <Route path='/payment' element={<ProtectedRouter><Payment /></ProtectedRouter>} />
+
+          <Route path='/admin' element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+        </Routes>
+      </Suspense>
+    </>
+  );
+}
+
 function App() {
   return (
+    <RecentlyWatchedProvider>
     <AuthProvider>
       <OrderProvider>
         <WishlistProvider>
           <CartProvider>
             <ShopProvider>
               <BrowserRouter>
-                <ScrollToTop /> 
-
-                {!JSON.parse(sessionStorage.getItem("user"))?.isAdmin && <Navbar />}
-
-                <Suspense fallback={<div className="text-center py-8">Loading...</div>}>
-                  <Routes>
-                    <Route path='/signup' element={<Signup />} />
-                    <Route path='/login' element={<Login />} />
-                    <Route path='/' element={<Shop />} />
-                    <Route path='/about' element={<About />} />
-                    <Route path='/careers' element={<Careers />} />
-                    <Route path='/contact' element={<Contact />} />
-                    <Route path="/edit" element={<EditProfile />} />
-
-                    <Route path='/mens' element={<Men />} />
-                    <Route path='/womens' element={<Women />} />
-                    <Route path='/kids' element={<Kids />} />
-                    <Route path='/product/:id' element={<Product />} />
-                    <Route path='/cart' element={<Cart />} />
-                    <Route path='/order' element={<Order />} />
-                    <Route path='/wish' element={<WishList />} />
-                    <Route path='/admin' element={<AdminDashboard />} />
-                  </Routes>
-                </Suspense>
+                <AppWrapper />
               </BrowserRouter>
             </ShopProvider>
           </CartProvider>
         </WishlistProvider>
       </OrderProvider>
     </AuthProvider>
+    </RecentlyWatchedProvider>
   );
 }
 

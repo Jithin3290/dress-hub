@@ -74,9 +74,9 @@ function WishList() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-4">Your Wishlist</h1>
+      <h1 className="text-2xl font-semibold text-center mb-4">Your Wishlist</h1>
       {wishListProducts.length === 0 ? (
-        <p className="text-gray-500">Your wishlist is empty.</p>
+        <p className="text-gray-500 text-center">Your wishlist is empty.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {wishListProducts.map((product) => (

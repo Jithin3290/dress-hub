@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useContext } from 'react';
-import ShopContext from '../../Context/ShopContext';
 import axios from 'axios';
 import {
   PieChart,
@@ -21,7 +20,19 @@ function AdminHome() {
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const data = useContext(ShopContext);
+  const [data,setData] = useState([]);
+   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/all_products");
+        setData(res.data);
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const formatDateToISO = (dateStr) => {
     if (!dateStr) return '';

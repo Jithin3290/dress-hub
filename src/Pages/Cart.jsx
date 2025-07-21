@@ -5,6 +5,7 @@ import CartContext from '../Context/CartContext';
 import ShopContext from '../Context/ShopContext';
 import AuthContext from '../Context/AuthContext';
 import OrderContext from '../Context/OrderContext';
+import toast, { Toaster } from 'react-hot-toast';
 
 function Cart() {
   const { user } = useContext(AuthContext);
@@ -47,14 +48,13 @@ function Cart() {
   };
 
   const handleQuantityChange = (id, delta) => {
-    const updatedCart = cartItems.map((item) =>
-      item.id === id
-        ? {
-            ...item,
-            quantity: Math.min(5, Math.max(1, item.quantity + delta)),
-          }
-        : item
-    );
+    const updatedCart = cartItems.map((item) => {
+      if (item.id === id) {
+        const newQty = item.quantity + delta;
+        return { ...item, quantity: newQty };
+      }
+      return item;
+    });
     updateCartInServer(updatedCart);
   };
 
@@ -64,12 +64,15 @@ function Cart() {
 
     const updatedCart = cartItems.filter((cart) => cart.id !== item.id);
     updateCartInServer(updatedCart);
+
+    navigate("/payment");
   };
 
   const handleBuyAll = () => {
     const updatedOrder = [...order, ...cartItems];
     updateOrderInServer(updatedOrder);
     updateCartInServer([]);
+    navigate("/payment");
   };
 
   const totalPrice = cartItems.reduce((sum, item) => {
@@ -77,13 +80,16 @@ function Cart() {
     return product ? sum + item.quantity * product.new_price : sum;
   }, 0);
 
-  if (loading) return <div className="text-center p-8 text-lg font-semibold">Loading your cart...</div>;
+  if (loading)
+    return <div className="text-center p-8 text-lg font-semibold">Loading your cart...</div>;
+
   if (!user)
     return (
       <div className="text-center p-8 text-red-500 font-semibold text-xl">
         Please log in to view your cart.
       </div>
     );
+
   if (!cartItems || cartItems.length === 0)
     return (
       <div className="text-center p-8 text-gray-600 font-semibold text-xl">
@@ -93,6 +99,7 @@ function Cart() {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
+      <Toaster position="top-center" />
       <h2 className="text-2xl font-bold mb-6">Your Cart</h2>
 
       <div className="space-y-4">
@@ -121,17 +128,33 @@ function Cart() {
 
                   <div className="mt-2 flex gap-2 items-center">
                     <button
-                      className="bg-gray-200 px-2 py-1 rounded"
-                      onClick={() => handleQuantityChange(item.id, -1)}
-                      disabled={item.quantity <= 1}
+                      className={`px-2 py-1 rounded ${
+                        item.quantity <= 1 ? "bg-gray-300 cursor-not-allowed" : "bg-gray-200"
+                      }`}
+                      onClick={() => {
+                        if (item.quantity <= 1) {
+                          toast.error("Minimum quantity is 1");
+                          return;
+                        }
+                        handleQuantityChange(item.id, -1);
+                      }}
                     >
                       -
                     </button>
+
                     <span className="px-2">{item.quantity}</span>
+
                     <button
-                      className="bg-gray-200 px-2 py-1 rounded"
-                      onClick={() => handleQuantityChange(item.id, 1)}
-                      disabled={item.quantity >= 5}
+                      className={`px-2 py-1 rounded ${
+                        item.quantity >= 5 ? "bg-gray-300 cursor-not-allowed" : "bg-gray-200"
+                      }`}
+                      onClick={() => {
+                        if (item.quantity >= 5) {
+                          toast.error("Maximum quantity is 5");
+                          return;
+                        }
+                        handleQuantityChange(item.id, 1);
+                      }}
                     >
                       +
                     </button>
@@ -163,14 +186,12 @@ function Cart() {
 
       <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <p className="text-lg font-semibold">Total: ₹{totalPrice}</p>
-        <div className="flex gap-4">
-          <button
-            onClick={handleBuyAll}
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg"
-          >
-            Buy All
-          </button>
-        </div>
+        <button
+          onClick={handleBuyAll}
+          className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg"
+        >
+          Buy All
+        </button>
       </div>
     </div>
   );

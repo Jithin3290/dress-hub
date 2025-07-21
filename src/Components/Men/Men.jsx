@@ -4,6 +4,7 @@ import WishlistContext from '../../Context/WishlistContext';
 import { Link } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import AuthContext from '../../Context/AuthContext';
+import Footer from '../Footer/Footer';
 
 function Men() {
   const products = useContext(ShopContext);
@@ -31,11 +32,9 @@ function Men() {
 
   const menProducts = products.filter(item => item.category === "men");
 
-  return (
+  return (<>
     <div>
-      <Toaster position="top-center" reverseOrder={false} />
-      <img src="/product/banner_mens.png" alt="banner" />
-      <h1 className="text-center p-10 text-xl font-bold mb-4">Men's Collection</h1>
+      <Toaster position="top-center" reverseOrder={false} />      <h1 className="text-center p-10 text-xl font-bold mb-4">Men's Collection</h1>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {menProducts.map(product => (
@@ -58,7 +57,13 @@ function Men() {
           </div>
         ))}
       </div>
+      
     </div>
+    <div className='pt-10'>
+      <Footer/>
+    </div>
+    
+    </>
   );
 }
 
