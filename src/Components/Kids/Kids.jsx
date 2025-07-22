@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import ShopContext from '../../Context/ShopContext';
 import { Link } from 'react-router-dom';
 import WishlistContext from '../../Context/WishlistContext';
@@ -9,7 +9,9 @@ import Footer from '../Footer/Footer';
 function Kid() {
   const products = useContext(ShopContext); 
   const { wish, setWish } = useContext(WishlistContext);
-  const{user}=useContext(AuthContext)
+  const { user } = useContext(AuthContext);
+
+  const [priceFilter, setPriceFilter] = useState("all");
 
   const toggleWishlist = (id) => {
     if (user && user.login === true) {
@@ -30,13 +32,33 @@ function Kid() {
 
   const kidsProducts = products.filter(item => item.category === "kid");
 
+  const filteredProducts = kidsProducts.filter(product => {
+    if (priceFilter === "below100") return product.new_price < 100;
+    if (priceFilter === "above100") return product.new_price >= 100;
+    return true;
+  });
+
   return ( 
     <div>
       <Toaster position="top-center" reverseOrder={false} />
-      <h1 className="text-center p-10 text-xl font-bold mb-4">Kid's Collection</h1>
-      
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {kidsProducts.map(product => (
+
+      <div className="flex flex-col md:flex-row md:justify-between items-center p-4">
+        <h1 className="text-xl font-bold mb-4 md:mb-0">Kid's Collection</h1>
+
+        {/* Dropdown filter */}
+        <select
+          className="border px-3 py-2 rounded"
+          value={priceFilter}
+          onChange={(e) => setPriceFilter(e.target.value)}
+        >
+          <option value="all">All</option>
+          <option value="below100">Below $100</option>
+          <option value="above100">Above $100</option>
+        </select>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
+        {filteredProducts.map(product => (
           <div key={product.id} className="relative border p-4 rounded hover:shadow-lg transition">
             <button
               onClick={() => toggleWishlist(product.id)}
@@ -57,11 +79,11 @@ function Kid() {
           </div>
         ))}
       </div>
+
       <div className='pt-10'>
-      <Footer/>
+        <Footer />
+      </div>
     </div>
-    </div>
-    
   );
 }
 

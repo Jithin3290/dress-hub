@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import ShopContext from '../../Context/ShopContext';
 import WishlistContext from '../../Context/WishlistContext';
 import { Link } from 'react-router-dom';
@@ -9,11 +9,11 @@ import Footer from '../Footer/Footer';
 function Women() {
   const products = useContext(ShopContext);
   const { wish, setWish } = useContext(WishlistContext);
-  const {user}=useContext(AuthContext)
+  const { user } = useContext(AuthContext);
+  const [priceFilter, setPriceFilter] = useState("all");
 
   const toggleWishlist = (id) => {
     if (user && user.login === true) {
-      // Just update local context; PATCH happens in Wishlist.jsx
       if (Array.isArray(wish) && wish.includes(id)) {
         setWish(prev => prev.filter(pid => pid !== id));
         toast.success("Removed from wishlist");
@@ -28,14 +28,32 @@ function Women() {
 
   const womenProducts = products.filter(item => item.category === "women");
 
+  const filteredProducts = womenProducts.filter(product => {
+    if (priceFilter === "below100") return product.new_price < 100;
+    if (priceFilter === "above100") return product.new_price >= 100;
+    return true;
+  });
+
   return (
     <div>
       <Toaster position="top-center" reverseOrder={false} />
 
-      <h1 className="text-center p-10 text-xl font-bold mb-4">Women's Collection</h1>
+      {/* Header with dropdown filter */}
+      <div className="flex flex-col md:flex-row md:justify-between items-center p-4">
+        <h1 className="text-xl font-bold mb-4 md:mb-0">Women's Collection</h1>
+        <select
+          className="border px-3 py-2 rounded"
+          value={priceFilter}
+          onChange={(e) => setPriceFilter(e.target.value)}
+        >
+          <option value="all">All</option>
+          <option value="below100">Below $100</option>
+          <option value="above100">Above $100</option>
+        </select>
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
-        {womenProducts.map(product => (
+        {filteredProducts.map(product => (
           <div
             key={product.id}
             className="relative border p-4 rounded hover:shadow-lg transition"
@@ -63,9 +81,10 @@ function Women() {
           </div>
         ))}
       </div>
+
       <div className='pt-10'>
-      <Footer/>
-    </div>
+        <Footer />
+      </div>
     </div>
   );
 }

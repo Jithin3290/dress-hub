@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import RecentlyWatchedContext from "../../Context/RecentlyWatchedContext";
+import AuthContext from "../../Context/AuthContext";
 
 function RecentlyWatched() {
   const { recentlyWatched } = useContext(RecentlyWatchedContext);

@@ -14,7 +14,7 @@ function Product() {
   const data = useContext(ShopContext);
   const { cartItems, setCartItems } = useContext(CartContext);
   const { order, setOrder } = useContext(OrderContext);
-  const { addToRecentlyWatched } = useContext(RecentlyWatchedContext);
+  const {recentlyWatched, addToRecentlyWatched } = useContext(RecentlyWatchedContext);
   const product = data.find(
     (item) => item.id === parseInt(id) || item.id === id
   );
@@ -79,15 +79,21 @@ function Product() {
       navigate("/payment");
     }, 1500);
   };
-   useEffect(() => {
-    if (product) {
-      addToRecentlyWatched({
-        id: product.id,
-        name: product.name,
-        image: product.image,
-      });
-    }
-  }, [product]);
+useEffect(() => {
+  if (
+    user?.login &&
+    product &&
+    !recentlyWatched.find((item) => item.id === product.id)
+  ) {
+    addToRecentlyWatched({
+      id: product.id,
+      name: product.name,
+      image: product.image,
+    });
+  }
+}, [user?.login, product?.id]);
+
+  
 
   if (!product) {
     return <p className="text-center mt-10 text-lg">Product not found.</p>;
