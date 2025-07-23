@@ -1,11 +1,11 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import CartContext from '../Context/CartContext';
-import ShopContext from '../Context/ShopContext';
-import AuthContext from '../Context/AuthContext';
-import OrderContext from '../Context/OrderContext';
-import toast, { Toaster } from 'react-hot-toast';
+import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import CartContext from "../Context/CartContext";
+import ShopContext from "../Context/ShopContext";
+import AuthContext from "../Context/AuthContext";
+import OrderContext from "../Context/OrderContext";
+import toast, { Toaster } from "react-hot-toast";
 
 function Cart() {
   const { user } = useContext(AuthContext);
@@ -25,7 +25,7 @@ function Cart() {
           setLoading(false);
         })
         .catch((err) => {
-          console.error('Failed to load cart:', err);
+          console.error("Failed to load cart:", err);
           setLoading(false);
         });
     } else {
@@ -81,7 +81,11 @@ function Cart() {
   }, 0);
 
   if (loading)
-    return <div className="text-center p-8 text-lg font-semibold">Loading your cart...</div>;
+    return (
+      <div className="text-center p-8 text-lg font-semibold">
+        Loading your cart...
+      </div>
+    );
 
   if (!user)
     return (
@@ -104,7 +108,9 @@ function Cart() {
 
       <div className="space-y-4">
         {cartItems.map((item) => {
-          const product = products.find((p) => String(p.id) === String(item.id));
+          const product = products.find(
+            (p) => String(p.id) === String(item.id)
+          );
           if (!product) return null;
 
           return (
@@ -129,7 +135,9 @@ function Cart() {
                   <div className="mt-2 flex gap-2 items-center">
                     <button
                       className={`px-2 py-1 rounded ${
-                        item.quantity <= 1 ? "bg-gray-300 cursor-not-allowed" : "bg-gray-200"
+                        item.quantity <= 1
+                          ? "bg-gray-300 cursor-not-allowed"
+                          : "bg-gray-200"
                       }`}
                       onClick={() => {
                         if (item.quantity <= 1) {
@@ -146,7 +154,9 @@ function Cart() {
 
                     <button
                       className={`px-2 py-1 rounded ${
-                        item.quantity >= 5 ? "bg-gray-300 cursor-not-allowed" : "bg-gray-200"
+                        item.quantity >= 5
+                          ? "bg-gray-300 cursor-not-allowed"
+                          : "bg-gray-200"
                       }`}
                       onClick={() => {
                         if (item.quantity >= 5) {
@@ -172,7 +182,9 @@ function Cart() {
                 <button
                   className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
                   onClick={() => {
-                    const updatedCart = cartItems.filter((cart) => cart.id !== item.id);
+                    const updatedCart = cartItems.filter(
+                      (cart) => cart.id !== item.id
+                    );
                     updateCartInServer(updatedCart);
                   }}
                 >

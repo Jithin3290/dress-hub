@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Careers() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const user = sessionStorage.getItem("user");
+    if (!user) {
+       navigate("/login");
+    }
+  }, []);
+
   return (
     <div className="bg-white text-gray-800 px-6 py-12">
       <div className="max-w-6xl mx-auto space-y-16">

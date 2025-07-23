@@ -25,6 +25,7 @@ import ProtectedRouter from './Components/ProtectedRoute/ProtectedRouter';
 import ProtectedAdminRoute from './Components/ProtectedRoute/ProtectedAdminRoute';
 import AuthContext from './Context/AuthContext';
 import Payment from './Pages/Payment';
+import Notfound from './Pages/Notfound';
 
 // Lazy-loaded components
 const About = lazy(() => import('./Components/Footer/About'));
@@ -34,15 +35,10 @@ const Contact = lazy(() => import('./Components/Footer/Contact'));
 // Wrapper to access useLocation + Admin Redirect
 function AppWrapper() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
   // ⛳ Redirect admin user to /admin when at /
-  useEffect(() => {
-    if (user?.isAdmin && location.pathname === '/') {
-      navigate('/admin', { replace: true });
-    }
-  }, [user, location.pathname, navigate]);
+ 
 
   const hideNavbarPaths = ['/login', '/signup', '/admin'];
   const shouldHideNavbar = hideNavbarPaths.some((path) =>
@@ -59,8 +55,8 @@ function AppWrapper() {
           <Route path='/login' element={<Login />} />
           <Route path='/' element={<Shop />} />
           <Route path='/about' element={<About />} />
-          <Route path='/careers' element={<Careers />} />
-          <Route path='/contact' element={<Contact />} />
+          <Route path='/careers' element={<ProtectedRouter><Careers /></ProtectedRouter>} />
+          <Route path='/contact' element={<ProtectedRouter><Contact /></ProtectedRouter>} />
           <Route path="/edit" element={<EditProfile />} />
           <Route path='/mens' element={<Men />} />
           <Route path='/womens' element={<Women />} />
@@ -70,6 +66,7 @@ function AppWrapper() {
           <Route path='/order' element={<ProtectedRouter><Order /></ProtectedRouter>} />
           <Route path='/wish' element={<ProtectedRouter><WishList /></ProtectedRouter>} />
           <Route path='/payment' element={<ProtectedRouter><Payment /></ProtectedRouter>} />
+          <Route path='*' element={<Notfound/>}></Route>
 
           <Route path='/admin' element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
         </Routes>

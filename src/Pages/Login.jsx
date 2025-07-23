@@ -39,7 +39,7 @@ function Login() {
 
       // ✅ Admin login logic
       if (admin && admin.password === password) {
-        await axios.patch(`http://localhost:3000/admin/${admin.id}`, { login: true });
+        await axios.patch(`http://localhost:3000/admin/${admin.id}`, { login: true ,isAdmin: true});
 
         // Set user with admin flag
         const adminWithRole = { ...admin, isAdmin: true };
@@ -55,7 +55,7 @@ function Login() {
         return;
       }
 
-      // ✅ User login logic
+      // User login logic
       if (!user || user.password !== password) {
         toast.error("Invalid email or password");
         return;
@@ -79,7 +79,7 @@ function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-pink-100">
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster position="top-center" toastOptions={{duration: 800 }}reverseOrder={false} />
       <form
         onSubmit={handleLogin}
         className="bg-white p-6 rounded-lg w-full max-w-md shadow-md"

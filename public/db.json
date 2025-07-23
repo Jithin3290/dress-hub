@@ -295,6 +295,30 @@
       "category": "kid",
       "new_price": "250",
       "old_price": "300"
+    },
+    {
+      "id": "6c53",
+      "name": "Men good looking shirt ",
+      "image": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTbxmYSSPnmnwrMJN3D0bctDfbAOLClE3uLHTEPZ8wYVwk8gL8FgbrNv3uCUiQUtLpv0U_ndq-cYP7bVAyUzlXaW5B3T_cwgSjsEGLnQgLghGtgwKlRaGIafQ",
+      "category": "men",
+      "new_price": "399",
+      "old_price": "499"
+    },
+    {
+      "id": "b8cb",
+      "name": "Men Shirt",
+      "image": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSuA1SmhQf9z5ZpnIpjg-_ZAHZdw6TyDpDzCYj8vGqFy3R6QM3vUw250wFHsfBmezvXMdAGJK6eX-tXeIk8UGSa6i0UguDS70DtH81pOopz",
+      "category": "men",
+      "new_price": "350",
+      "old_price": "499"
+    },
+    {
+      "id": "4325",
+      "name": "men",
+      "image": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRQhuonqb4uCthczJ2XvvdQmmc6-tyVLg-aCEaMIxjFsaPFDHWhFQquX_BqGyYPzBfO4H-D68J26F3zOtq0S4C0AAMZohTbN2TdvNONZDgB",
+      "category": "men",
+      "new_price": "200",
+      "old_price": "300"
     }
   ],
   "data": [
@@ -463,19 +487,54 @@
       "isAdmin": false,
       "cart": [
         {
-          "id": "15",
+          "id": "34",
           "quantity": 1,
-          "date": "2025-07-21"
+          "date": "2025-07-22"
+        },
+        {
+          "id": "14",
+          "quantity": 1,
+          "date": "2025-07-22"
         }
       ],
       "wish": [
-        "14"
+        "25"
       ],
       "order": [
         {
           "id": "26",
           "quantity": 1,
           "date": "2025-07-21"
+        },
+        {
+          "id": "15",
+          "quantity": 1,
+          "date": "2025-07-21"
+        },
+        {
+          "id": "6",
+          "quantity": 1,
+          "date": "2025-07-22"
+        },
+        {
+          "id": "1c3b",
+          "quantity": 1,
+          "date": "2025-07-22"
+        },
+        {
+          "id": "14",
+          "quantity": 1,
+          "date": "2025-07-22T09:37:23.832Z"
+        },
+        {
+          "id": "7",
+          "quantity": 1,
+          "date": "2025-07-22T09:37:25.864Z"
+        },
+        {
+          "id": "2",
+          "quantity": 1,
+          "date": "2025-07-23"
         }
       ],
       "blocked": false
@@ -642,24 +701,6 @@
       ]
     },
     {
-      "id": "2949",
-      "name": "soman",
-      "email": "soman@gmail.com",
-      "password": "soman@gmail.com",
-      "login": true,
-      "isAdmin": false,
-      "blocked": false,
-      "cart": [
-        {
-          "id": "14",
-          "quantity": 1,
-          "date": "2025-07-21"
-        }
-      ],
-      "wish": [],
-      "order": []
-    },
-    {
       "id": "f54d",
       "name": "syam",
       "email": "syam@gmail.com",
@@ -817,6 +858,136 @@
           "date": "2025-07-22"
         }
       ]
+    },
+    {
+      "id": "7699",
+      "name": "varuns",
+      "email": "varun@gmail.com",
+      "password": "varun@gmail.com",
+      "login": true,
+      "isAdmin": false,
+      "blocked": false,
+      "cart": [
+        {
+          "id": "13",
+          "quantity": 1,
+          "date": "2025-07-23T04:05:22.651Z"
+        },
+        {
+          "id": "1",
+          "quantity": 1,
+          "date": "2025-07-23"
+        },
+        {
+          "id": "2",
+          "quantity": 1,
+          "date": "2025-07-23"
+        }
+      ],
+      "wish": [],
+      "order": [
+        {
+          "id": "31",
+          "quantity": 2,
+          "date": "2025-07-23"
+        },
+        {
+          "id": "2",
+          "quantity": 1,
+          "date": "2025-07-23"
+        }
+      ]
+    },
+    {
+      "id": "d782",
+      "name": "soman",
+      "email": "soman@gmail.com",
+      "password": "soman@gmail.com",
+      "login": true,
+      "isAdmin": false,
+      "blocked": false,
+      "cart": [
+        {
+          "id": "15",
+          "quantity": 1,
+          "date": "2025-07-23T04:42:16.328Z"
+        },
+        {
+          "id": "28",
+          "quantity": 1,
+          "date": "2025-07-23T04:42:18.494Z"
+        }
+      ],
+      "wish": [],
+      "order": [
+        {
+          "id": "14",
+          "quantity": 1,
+          "date": "2025-07-23T04:41:41.711Z"
+        },
+        {
+          "id": "14",
+          "quantity": 1,
+          "date": "2025-07-23T04:41:51.627Z"
+        },
+        {
+          "id": "14",
+          "quantity": 1,
+          "date": "2025-07-23T04:42:06.743Z"
+        },
+        {
+          "id": "14",
+          "quantity": 5,
+          "date": "2025-07-23T04:42:15.311Z"
+        }
+      ]
+    },
+    {
+      "id": "cd47",
+      "name": "g",
+      "email": "gokul@gmail.com",
+      "password": "gokul@gmail.com",
+      "login": true,
+      "isAdmin": false,
+      "blocked": true,
+      "cart": [],
+      "wish": [
+        "14",
+        "15",
+        "16"
+      ],
+      "order": [
+        {
+          "id": "3",
+          "quantity": 1,
+          "date": "2025-07-23"
+        },
+        {
+          "id": "14",
+          "quantity": 1,
+          "date": "2025-07-23"
+        },
+        {
+          "id": "15",
+          "quantity": 1,
+          "date": "2025-07-23T08:59:51.671Z"
+        },
+        {
+          "id": "16",
+          "quantity": 1,
+          "date": "2025-07-23T08:59:53.537Z"
+        },
+        {
+          "id": "2",
+          "quantity": 1,
+          "date": "2025-07-23"
+        },
+        {
+          "id": "26",
+          "quantity": 4,
+          "date": "2025-07-23"
+        }
+      ]
     }
   ],
   "admin": [
@@ -825,8 +996,8 @@
       "name": "Admin",
       "email": "admin@gmail.com",
       "password": "123454321",
-      "login": true,
-      "isAdmin": true
+      "login": false,
+      "isAdmin": false
     }
   ]
 }

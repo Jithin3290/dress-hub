@@ -48,7 +48,7 @@ function AdminHome() {
     const product = data.find((p) => p.id === id);
     return product?.new_price || 0;
   };
-
+// Returns product count for each category 
   const getCategoryData = () => {
     const categoryMap = {};
     data.forEach((product) => {

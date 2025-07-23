@@ -49,7 +49,6 @@ function WishList() {
     setCartItems(updatedCart);
     try {
       await axios.patch(`http://localhost:3000/user/${user.id}`, { cart: updatedCart });
-      toast.success('Added to cart');
     } catch (error) {
       console.error('Error adding to cart:', error);
     }
@@ -64,8 +63,7 @@ function WishList() {
       const updatedOrder = [...prevOrder, orderItem];
 
       await axios.patch(`http://localhost:3000/user/${user.id}`, { order: updatedOrder });
-      toast.success('Order placed');
-      navigate('/order');
+      navigate('/payment');
     } catch (error) {
       console.error('Buy now failed:', error);
     }

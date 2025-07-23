@@ -16,7 +16,7 @@ function Product() {
   const { order, setOrder } = useContext(OrderContext);
   const {recentlyWatched, addToRecentlyWatched } = useContext(RecentlyWatchedContext);
   const product = data.find(
-    (item) => item.id === parseInt(id) || item.id === id
+    (item) =>  item.id == id
   );
 
   const user = JSON.parse(sessionStorage.getItem("user"));
@@ -103,7 +103,7 @@ useEffect(() => {
 
   return (<>
     <div className="max-w-5xl mx-auto p-6 mt-4">
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster position="top-center" toastOptions={{duration: 600 }}reverseOrder={false} />
 
       <div className="grid md:grid-cols-2 gap-10 bg-white p-6 rounded-lg shadow-lg">
         <img

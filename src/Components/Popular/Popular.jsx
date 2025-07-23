@@ -10,7 +10,6 @@ function Popular() {
         const response = await fetch('http://localhost:3000/data');
         const data = await response.json();
         setOg(data);
-        console.log(data);
       } catch (e) {
         console.log('Error fetching data:', e);
       }

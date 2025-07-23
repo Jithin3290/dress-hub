@@ -5,6 +5,7 @@ function NewCollections() {
   const [og, setOg] = useState([]);
 
   useEffect(() => {
+    
     async function col() {
       try {
         const item = await fetch("http://localhost:3000/new_collections");

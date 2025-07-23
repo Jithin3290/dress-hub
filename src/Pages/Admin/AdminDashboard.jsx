@@ -9,7 +9,7 @@ function AdminDashboard() {
   const [section, setSection] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Wrap setSection to auto-close sidebar on mobile
+  // Wrap setSection to auto close sidebar on mobile
   const handleSectionChange = (sectionName) => {
     setSection(sectionName);
     setSidebarOpen(false); // Auto-close on mobile
@@ -28,7 +28,6 @@ function AdminDashboard() {
         </button>
       </div>
 
-      {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? "block" : "hidden"
@@ -36,8 +35,7 @@ function AdminDashboard() {
       >
         <Sidebar setSection={handleSectionChange} />
       </div>
-
-      {/* Main Content */}
+        {/* section: controls which admin section is currently shown */}
       <div className="flex-1 p-4 md:p-6 bg-gray-100 overflow-y-auto">
         {section === "dashboard" && <AdminHome />}
         {section === "products" && <ManageProducts />}

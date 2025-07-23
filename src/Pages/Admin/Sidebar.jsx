@@ -1,12 +1,15 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthContext from "../../Context/AuthContext";
-
+import axios from "axios";
+//The Sidebar component provides navigation for the admin panel using setSection
 function Sidebar({ setSection }) {
   const navigate = useNavigate();
   const { setUser } = useContext(AuthContext); 
   const handleLogout = () => {
     sessionStorage.removeItem("user");
+   axios.patch(`http://localhost:3000/admin/admin123`, { login: false,isAdmin: false });
+
     setUser(null)
     navigate("/login");
   };
