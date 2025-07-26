@@ -9,8 +9,6 @@ function Shop() {
   return (
     <div>
       <Hero />
-      <br />
-      <br />
       <hr />
       <br />
       <br />

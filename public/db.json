@@ -313,12 +313,12 @@
       "old_price": "499"
     },
     {
-      "id": "4325",
-      "name": "men",
-      "image": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRQhuonqb4uCthczJ2XvvdQmmc6-tyVLg-aCEaMIxjFsaPFDHWhFQquX_BqGyYPzBfO4H-D68J26F3zOtq0S4C0AAMZohTbN2TdvNONZDgB",
-      "category": "men",
-      "new_price": "200",
-      "old_price": "300"
+      "id": "1e2a",
+      "name": "Kid good looking shirt",
+      "image": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQhT_PHBIyt5IDU74jmUojNXbgvEB0EELHvIpyz__fLiBQAAgVEfvVgPvg0WOt1BfOXxyXAcxjbzIGo-OgWhWOJCiO5FrkdeaHJJH95k4OusYKfrXuyq-rkgw",
+      "category": "kid",
+      "new_price": 900,
+      "old_price": 999
     }
   ],
   "data": [
@@ -476,7 +476,8 @@
         }
       ],
       "wish": [],
-      "isAdmin": false
+      "isAdmin": false,
+      "blocked": true
     },
     {
       "id": "4bcf",
@@ -485,56 +486,22 @@
       "password": "jithi@gmail.com",
       "login": true,
       "isAdmin": false,
-      "cart": [
-        {
-          "id": "34",
-          "quantity": 1,
-          "date": "2025-07-22"
-        },
-        {
-          "id": "14",
-          "quantity": 1,
-          "date": "2025-07-22"
-        }
-      ],
+      "cart": [],
       "wish": [
-        "25"
+        "14",
+        "15",
+        "16"
       ],
       "order": [
         {
           "id": "26",
-          "quantity": 1,
-          "date": "2025-07-21"
+          "quantity": 5,
+          "date": "2025-07-24"
         },
         {
           "id": "15",
           "quantity": 1,
-          "date": "2025-07-21"
-        },
-        {
-          "id": "6",
-          "quantity": 1,
-          "date": "2025-07-22"
-        },
-        {
-          "id": "1c3b",
-          "quantity": 1,
-          "date": "2025-07-22"
-        },
-        {
-          "id": "14",
-          "quantity": 1,
-          "date": "2025-07-22T09:37:23.832Z"
-        },
-        {
-          "id": "7",
-          "quantity": 1,
-          "date": "2025-07-22T09:37:25.864Z"
-        },
-        {
-          "id": "2",
-          "quantity": 1,
-          "date": "2025-07-23"
+          "date": "2025-07-24T11:39:11.028Z"
         }
       ],
       "blocked": false
@@ -709,8 +676,38 @@
       "isAdmin": false,
       "blocked": false,
       "cart": [],
-      "wish": [],
-      "order": []
+      "wish": [
+        "13",
+        "14",
+        "15"
+      ],
+      "order": [
+        {
+          "id": "6c53",
+          "quantity": 4,
+          "date": "2025-07-24"
+        },
+        {
+          "id": "6",
+          "quantity": 3,
+          "date": "2025-07-24"
+        },
+        {
+          "id": "26",
+          "quantity": 3,
+          "date": "2025-07-24"
+        },
+        {
+          "id": "27",
+          "quantity": 3,
+          "date": "2025-07-24"
+        },
+        {
+          "id": "28",
+          "quantity": 2,
+          "date": "2025-07-24"
+        }
+      ]
     },
     {
       "id": "a8da",

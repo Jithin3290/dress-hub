@@ -1,5 +1,7 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 function ManageProducts() {
   const [products, setProducts] = useState([]);
@@ -7,14 +9,7 @@ function ManageProducts() {
   const [visibleCount, setVisibleCount] = useState(10);
   const [editPrices, setEditPrices] = useState({});
   const [editingId, setEditingId] = useState(null);
-
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    image: "",
-    category: "",
-    new_price: "",
-    old_price: "",
-  });
+  const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,7 +20,6 @@ function ManageProducts() {
         console.error("Failed to fetch products:", err);
       }
     };
-
     fetchData();
   }, []);
 
@@ -43,26 +37,6 @@ function ManageProducts() {
     } catch (error) {
       console.error("Failed to delete product:", error);
     }
-  };
-
-  const handleAddProduct = async () => {
-    const { name, image, category, new_price, old_price } = newProduct;
-    if (!name || !image || !category || !new_price || !old_price) {
-      alert("Fill all fields");
-      return;
-    }
-
-    try {
-      const res = await axios.post("http://localhost:3000/all_products", newProduct);
-      setLocalProducts((prev) => [res.data, ...prev]);
-      setNewProduct({ name: "", image: "", category: "", new_price: "", old_price: "" });
-    } catch (error) {
-      console.error("Failed to add product:", error);
-    }
-  };
-
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + 10);
   };
 
   const handlePriceEdit = (id, field, value) => {
@@ -102,57 +76,82 @@ function ManageProducts() {
     }
   };
 
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      image: "",
+      category: "",
+      new_price: "",
+      old_price: "",
+    },
+    validationSchema: Yup.object({
+      name: Yup.string().required("Required"),
+      image: Yup.string().url("Invalid URL").required("Required"),
+      category: Yup.string().required("Required"),
+      new_price: Yup.number().required("Required").positive("Must be positive"),
+      old_price: Yup.number().required("Required").positive("Must be positive"),
+    }),
+    onSubmit: async (values, { resetForm }) => {
+      try {
+        const res = await axios.post("http://localhost:3000/all_products", values);
+        setLocalProducts((prev) => [res.data, ...prev]);
+        resetForm();
+        setShowAddForm(false);
+      } catch (error) {
+        console.error("Failed to add product:", error);
+      }
+    },
+  });
+
   return (
     <div className="p-4">
       <h2 className="text-2xl font-semibold mb-6">Manage Products</h2>
 
-      {/* Add Product */}
-      <div className="mb-6 bg-gray-50 p-4 rounded shadow">
-        <h3 className="text-lg font-semibold mb-3">Add New Product</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <input
-            type="text"
-            placeholder="Product Name"
-            className="border p-2 rounded"
-            value={newProduct.name}
-            onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Image URL"
-            className="border p-2 rounded"
-            value={newProduct.image}
-            onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Category"
-            className="border p-2 rounded"
-            value={newProduct.category}
-            onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-          />
-          <input
-            type="number"
-            placeholder="New Price"
-            className="border p-2 rounded"
-            value={newProduct.new_price}
-            onChange={(e) => setNewProduct({ ...newProduct, new_price: e.target.value })}
-          />
-          <input
-            type="number"
-            placeholder="Old Price"
-            className="border p-2 rounded"
-            value={newProduct.old_price}
-            onChange={(e) => setNewProduct({ ...newProduct, old_price: e.target.value })}
-          />
-        </div>
-        <button
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          onClick={handleAddProduct}
+      {/* Toggle Add Product Button */}
+      <button
+        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        onClick={() => setShowAddForm((prev) => !prev)}
+      >
+        {showAddForm ? "➖ Hide Add Product" : "➕ Add New Product"}
+      </button>
+
+      {/* Add Product Form */}
+      {showAddForm && (
+        <form
+          onSubmit={formik.handleSubmit}
+          className="mb-6 bg-gray-50 p-4 rounded shadow"
         >
-          Add Product
-        </button>
-      </div>
+          <h3 className="text-lg font-semibold mb-3">Add New Product</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {["name", "image", "category", "new_price", "old_price"].map((field) => (
+              <div key={field} className="flex flex-col">
+                <input
+                  type={field.includes("price") ? "number" : "text"}
+                  name={field}
+                  placeholder={
+                    field
+                      .replace("_", " ")
+                      .replace(/\b\w/g, (c) => c.toUpperCase())
+                  }
+                  className="border p-2 rounded"
+                  value={formik.values[field]}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched[field] && formik.errors[field] && (
+                  <span className="text-sm text-red-600">{formik.errors[field]}</span>
+                )}
+              </div>
+            ))}
+          </div>
+          <button
+            type="submit"
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Add Product
+          </button>
+        </form>
+      )}
 
       {/* Product List */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -230,11 +229,11 @@ function ManageProducts() {
         ))}
       </div>
 
-      {/* Load More */}
+      {/* Load More Button */}
       {visibleCount < localProducts.length && (
         <div className="flex justify-center mt-6">
           <button
-            onClick={handleLoadMore}
+            onClick={() => setVisibleCount((prev) => prev + 10)}
             className="px-6 py-2 bg-gray-800 text-white rounded hover:bg-gray-900"
           >
             Load More
