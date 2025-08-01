@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import AuthContext from '../Context/AuthContext';
-import useProtectedLoginRedirect from '../Components/ProtectedRoute/useProtectedLoginRedirect';
+import useProtectedLoginRedirect from '../Components/ProtectedRoutes/useProtectedLoginRedirect';
 function Login() {
   useProtectedLoginRedirect()
   const navigate = useNavigate();
