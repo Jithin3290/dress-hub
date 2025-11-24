@@ -419,7 +419,7 @@
       "cart": [
         {
           "id": "15",
-          "quantity": 1,
+          "quantity": 2,
           "date": "2025-07-19"
         },
         {
@@ -475,9 +475,16 @@
           "date": "2025-07-21"
         }
       ],
-      "wish": [],
+      "wish": [
+        "26",
+        "27",
+        "14",
+        "28",
+        "15",
+        "16"
+      ],
       "isAdmin": false,
-      "blocked": true
+      "blocked": false
     },
     {
       "id": "4bcf",
@@ -940,49 +947,34 @@
       ]
     },
     {
-      "id": "cd47",
-      "name": "g",
-      "email": "gokul@gmail.com",
-      "password": "gokul@gmail.com",
+      "id": "d1c2",
+      "name": "jazz",
+      "email": "jazz@gmail.com",
+      "password": "jazzjazz",
       "login": true,
       "isAdmin": false,
-      "blocked": true,
-      "cart": [],
+      "blocked": false,
+      "cart": [
+        {
+          "id": "35",
+          "quantity": 1,
+          "date": "2025-11-22"
+        }
+      ],
       "wish": [
         "14",
-        "15",
         "16"
       ],
       "order": [
         {
-          "id": "3",
-          "quantity": 1,
-          "date": "2025-07-23"
-        },
-        {
-          "id": "14",
-          "quantity": 1,
-          "date": "2025-07-23"
+          "id": "26",
+          "quantity": 4,
+          "date": "2025-11-22"
         },
         {
           "id": "15",
           "quantity": 1,
-          "date": "2025-07-23T08:59:51.671Z"
-        },
-        {
-          "id": "16",
-          "quantity": 1,
-          "date": "2025-07-23T08:59:53.537Z"
-        },
-        {
-          "id": "2",
-          "quantity": 1,
-          "date": "2025-07-23"
-        },
-        {
-          "id": "26",
-          "quantity": 4,
-          "date": "2025-07-23"
+          "date": "2025-11-22T08:33:14.614Z"
         }
       ]
     }
