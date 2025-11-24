@@ -1,25 +1,21 @@
-import React, { useEffect, useState } from "react";
+// src/Components/Popular/Popular.jsx
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProducts } from "../../Redux/Slices/productsSlice";
+
+const PLACEHOLDER = "/product/placeholder.png";
 
 function Popular() {
-  const [og, setOg] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { items = [], loading = false } = useSelector((state) => state.products || {});
 
   useEffect(() => {
-    async function Col() {
-      try {
-        const response = await fetch("http://localhost:3000/data");
-        const data = await response.json();
-        setOg(data);
-      } catch (e) {
-        console.log("Error fetching data:", e);
-      } finally {
-        setLoading(false);
-      }
-    }
+    // Correct parameter
+    dispatch(fetchProducts({ limit: 8, category: "women" }));
+  }, [dispatch]);
 
-    Col();
-  }, []);
+  const products = (items || []).slice(0, 8);
 
   if (loading) {
     return (
@@ -43,7 +39,7 @@ function Popular() {
 
   return (
     <div className="py-16 px-6 sm:px-10 lg:px-20 bg-gradient-to-br from-purple-50 to-pink-50">
-      {/* Header Section */}
+
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full border border-purple-200 shadow-sm mb-6">
           <div className="w-2 h-2 bg-pink-500 rounded-full animate-pulse"></div>
@@ -60,8 +56,7 @@ function Popular() {
         </h1>
 
         <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Discover the most loved styles that are making waves in women's
-          fashion
+          Discover the most loved styles that are making waves in women's fashion
         </p>
 
         <div className="flex justify-center mt-8">
@@ -69,110 +64,99 @@ function Popular() {
         </div>
       </div>
 
-      {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {og.map((item, index) => (
-          <div
-            key={item.id}
-            className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-purple-200"
-            style={{
-              animationDelay: `${index * 100}ms`,
-              animation: `fadeInUp 0.6s ease-out ${index * 100}ms both`,
-            }}
-          >
-            {/* Popular Badge */}
-            <div className="absolute top-4 right-4 z-10">
-              <span className="px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full shadow-lg">
-                TRENDING
-              </span>
-            </div>
+        {products.map((item, index) => {
+          const imageSrc = item?.image || PLACEHOLDER;
+          const avgRating = Number(item?.avg_rating ?? 0);
+          const reviewCount = Number(item?.review_count ?? 0);
+          const newPrice = Number(item?.new_price ?? 0);
+          const oldPrice = Number(item?.old_price ?? 0);
 
-            {/* Image Container */}
-            <Link to={`/product/${item.id}`}>
-              <div className="relative overflow-hidden bg-gray-100">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-72 object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          return (
+            <div
+              key={item.id}
+              className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-purple-200"
+              style={{
+                animationDelay: `${index * 100}ms`,
+                animation: `fadeInUp 0.6s ease-out ${index * 100}ms both`,
+              }}
+            >
+              <div className="absolute top-4 right-4 z-10">
+                <span className="px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full shadow-lg">
+                  TRENDING
+                </span>
               </div>
-            </Link>
 
-            {/* Product Info */}
-            <div className="p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-purple-700 transition-colors duration-300 min-h-[3.5rem]">
-                {item.name}
-              </h3>
+              <Link to={`/product/${item.id}`}>
+                <div className="relative overflow-hidden bg-gray-100">
+                  <img
+                    src={imageSrc}
+                    alt={item?.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = PLACEHOLDER;
+                    }}
+                    className="w-full h-72 object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
 
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col">
-                  <span className="text-2xl font-black text-gray-900">
-                    ₹{item.new_price}
-                  </span>
-                  {item.old_price > item.new_price && (
-                    <span className="text-sm text-gray-500 line-through">
-                      ₹{item.old_price}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                </div>
+              </Link>
+
+              <div className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-purple-700 transition-colors duration-300 min-h-[3.5rem]">
+                  {item?.name}
+                </h3>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-2xl font-black text-gray-900">
+                      ₹{newPrice.toFixed(2)}
                     </span>
+                    {oldPrice > newPrice && (
+                      <span className="text-sm text-gray-500 line-through">
+                        ₹{oldPrice.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+
+                  {oldPrice > newPrice && (
+                    <div className="text-right">
+                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded">
+                        Save {Math.round(((oldPrice - newPrice) / oldPrice) * 100)}%
+                      </span>
+                    </div>
                   )}
                 </div>
 
-                {/* Discount Percentage */}
-                {item.old_price > item.new_price && (
-                  <div className="text-right">
-                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded">
-                      Save{" "}
-                      {Math.round(
-                        ((item.old_price - item.new_price) / item.old_price) *
-                          100
-                      )}
-                      %
-                    </span>
+                <div className="flex items-center gap-2 mt-4">
+                  <div className="flex text-amber-400">
+                    {[...Array(5)].map((_, i) => (
+                      <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
                   </div>
-                )}
-              </div>
-
-              {/* Rating Stars */}
-              <div className="flex items-center gap-2 mt-4">
-                <div className="flex text-amber-400">
-                  {[...Array(5)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className="w-4 h-4 fill-current"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
+                  <span className="text-sm text-gray-500 font-medium">{avgRating.toFixed(1)}</span>
+                  <span className="text-xs text-gray-400">({reviewCount})</span>
                 </div>
-                <span className="text-sm text-gray-500 font-medium">4.8</span>
-                <span className="text-xs text-gray-400">(128)</span>
-              </div>
 
-              {/* Color Variants */}
-              <div className="flex gap-2 mt-4">
-                <div className="w-4 h-4 bg-pink-400 rounded-full border-2 border-white shadow"></div>
-                <div className="w-4 h-4 bg-purple-400 rounded-full border-2 border-white shadow"></div>
-                <div className="w-4 h-4 bg-gray-400 rounded-full border-2 border-white shadow"></div>
-                <div className="w-4 h-4 bg-black rounded-full border-2 border-white shadow"></div>
+                <div className="flex gap-2 mt-4">
+                  <div className="w-4 h-4 bg-pink-400 rounded-full border-2 border-white shadow"></div>
+                  <div className="w-4 h-4 bg-purple-400 rounded-full border-2 border-white shadow"></div>
+                  <div className="w-4 h-4 bg-gray-400 rounded-full border-2 border-white shadow"></div>
+                  <div className="w-4 h-4 bg-black rounded-full border-2 border-white shadow"></div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>

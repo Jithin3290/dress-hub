@@ -1,16 +1,21 @@
-import React, { useContext, useEffect, useState } from "react";
+// src/Components/Navbar/EditProfiles/EditProfileNavbar.jsx
+import React, { useEffect, useState, useContext } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useSelector, useDispatch } from "react-redux";
 import CartContext from "../../Context/CartContext";
 import WishlistContext from "../../Context/WishlistContext";
-import AuthContext from "../../Context/AuthContext";
+import { setUser, clearUser } from "../../Redux/Slices/authSlice"; // adjust path
+import { buildImageUrl } from "../../utils/image"; // adjust path if needed
 
 function Navbar() {
   const { cartItems } = useContext(CartContext);
   const { wish } = useContext(WishlistContext);
-  const { user, setUser } = useContext(AuthContext);
 
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const user = useSelector((state) => state.auth?.user ?? null);
 
   const [cartcount, setcartcount] = useState(0);
   const [wishcount, setwishcount] = useState(0);
@@ -25,17 +30,35 @@ function Navbar() {
     setwishcount(wish.length);
   }, [wish]);
 
+  // sync sessionStorage user into redux store if store empty (keeps existing behavior)
+  useEffect(() => {
+    if (!user) {
+      try {
+        const raw = sessionStorage.getItem("user");
+        if (raw) {
+          const ssUser = JSON.parse(raw);
+          if (ssUser) dispatch(setUser(ssUser));
+        }
+      } catch {
+        // ignore parse errors
+      }
+    }
+  }, [user, dispatch]);
+
   const handleLogout = () => {
     toast.success("Logged out");
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("recentlyWatched");
-    setUser(null);
+    dispatch(clearUser());
     setShowDropdown(false);
     navigate("/login", { replace: true });
   };
 
   const activeClass =
     "text-amber-600 font-bold relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-amber-600 after:animate-slideIn";
+
+  // build avatar URL if available
+  const avatarUrl = buildImageUrl(user?.profile_picture);
 
   return (
     <nav className="bg-white/95 backdrop-blur-lg shadow-lg border-b border-gray-100 px-4 sm:px-8 py-4 sticky top-0 z-50">
@@ -171,19 +194,28 @@ function Navbar() {
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 font-semibold shadow-md"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                {/* show small avatar inside button if available */}
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt="avatar"
+                    className="w-6 h-6 rounded-full object-cover"
                   />
-                </svg>
+                ) : (
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                )}
                 Profile
               </button>
 
@@ -191,9 +223,18 @@ function Navbar() {
               {showDropdown && (
                 <div className="absolute right-0 mt-3 w-64 bg-white/95 backdrop-blur-lg border border-gray-200 rounded-2xl shadow-2xl text-sm z-30 overflow-hidden">
                   <div className="flex justify-between items-center border-b border-gray-100 px-6 py-4 bg-gradient-to-r from-amber-50 to-amber-100">
-                    <div>
-                      <p className="font-bold text-gray-900">{user.name}</p>
-                      <p className="text-gray-600 text-xs mt-1">{user.email}</p>
+                    <div className="flex items-center gap-3">
+                      {avatarUrl && (
+                        <img
+                          src={avatarUrl}
+                          alt="avatar"
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      )}
+                      <div>
+                        <p className="font-bold text-gray-900">{user.name}</p>
+                        <p className="text-gray-600 text-xs mt-1">{user.email}</p>
+                      </div>
                     </div>
                     <button
                       onClick={() => setShowDropdown(false)}

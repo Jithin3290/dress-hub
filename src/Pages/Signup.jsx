@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
 import useProtectedLoginRedirect from '../Components/ProtectedRoutes/useProtectedLoginRedirect';
-import { signupUser } from "../Redux/Slices/authSlice.jsx"; // adjust path as needed
+import { signupUser } from "../Redux/Slices/authSlice.jsx"; 
 
 function Signup() {
   useProtectedLoginRedirect();

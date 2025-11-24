@@ -21,7 +21,7 @@ const getAxiosError = (err) => {
 };
 
 /**
- * Thunks using axios instance (baseURL = http://localhost:8000/api/v1/user)
+ * Thunks using axios instance (api should have baseURL and auth interceptors)
  */
 
 /**
@@ -82,7 +82,40 @@ export const fetchProfile = createAsyncThunk(
       const res = await api.get("/profile/");
       return res.data;
     } catch (err) {
-      // treat 401 as unauthorized
+      if (err?.response?.status === 401) return rejectWithValue({ detail: "Unauthorized" });
+      return rejectWithValue(getAxiosError(err));
+    }
+  }
+);
+
+/**
+ * updateProfile thunk.
+ * call: dispatch(updateProfile({ data, multipart }))
+ * data: plain object, may include File under profile_picture
+ * multipart: boolean, set true if sending files
+ */
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async ({ data, multipart = false }, { rejectWithValue }) => {
+    try {
+      let body = data;
+      const config = {};
+
+      if (multipart) {
+        const fd = new FormData();
+        Object.entries(data).forEach(([k, v]) => {
+          if (v !== undefined && v !== null) fd.append(k, v);
+        });
+        body = fd;
+        config.headers = { "Content-Type": "multipart/form-data" };
+      } else {
+        config.headers = { "Content-Type": "application/json" };
+      }
+
+      // Adjust endpoint if your backend expects /user/:id instead of /profile/
+      const res = await api.patch("/profile/", body, config);
+      return res.data;
+    } catch (err) {
       if (err?.response?.status === 401) return rejectWithValue({ detail: "Unauthorized" });
       return rejectWithValue(getAxiosError(err));
     }
@@ -94,6 +127,7 @@ const authSlice = createSlice({
   initialState: {
     user: storedUser,
     loading: false,
+    saving: false,
     error: null,
   },
   reducers: {
@@ -170,6 +204,22 @@ const authSlice = createSlice({
       })
       .addCase(fetchProfile.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload ?? action.error;
+      })
+
+      // updateProfile
+      .addCase(updateProfile.pending, (state) => {
+        state.saving = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.saving = false;
+        const user = action.payload.user ?? action.payload;
+        state.user = user;
+        sessionStorage.setItem("user", JSON.stringify(user));
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.saving = false;
         state.error = action.payload ?? action.error;
       });
   },

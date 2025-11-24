@@ -1,13 +1,14 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
-import AuthContext from '../Context/AuthContext';
 import useProtectedLoginRedirect from '../Components/ProtectedRoutes/useProtectedLoginRedirect';
+import { loginUser } from '../Redux/Slices/authSlice'; 
 function Login() {
-  useProtectedLoginRedirect()
+  useProtectedLoginRedirect();
   const navigate = useNavigate();
-  const { user, setUser } = useContext(AuthContext);
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.auth);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,57 +30,41 @@ function Login() {
     }
 
     try {
-      const [userRes, adminRes] = await Promise.all([
-        axios.get(`http://localhost:3000/user?email=${email}`),
-        axios.get(`http://localhost:3000/admin?email=${email}`)
-      ]);
-
-      const user = userRes.data[0];
-      const admin = adminRes.data[0];
-
-      // ✅ Admin login logic
-      if (admin && admin.password === password) {
-        await axios.patch(`http://localhost:3000/admin/${admin.id}`, { login: true ,isAdmin: true});
-
-        // Set user with admin flag
-        const adminWithRole = { ...admin, isAdmin: true };
-        setUser(adminWithRole);
-
-        toast.success("Admin login successful");
-
-        // Clear history and go to /admin
+      const result = await dispatch(loginUser({ email, password })).unwrap();
+      
+      toast.success("Login successful");
+      
+      // Check if user is admin based on the response
+      if (result.user?.is_staff || result.user?.is_superuser || result.isAdmin) {
+        // Admin user - redirect to admin panel
         setTimeout(() => {
           window.location.href = "/admin";
         }, 100);
-
-        return;
+      } else {
+        // Regular user - redirect to home
+        setTimeout(() => navigate("/"), 500);
       }
-
-      // User login logic
-      if (!user || user.password !== password) {
-        toast.error("Invalid email or password");
-        return;
-      }
-
-      if (user.blocked) {
-        toast.error("User account is blocked");
-        return;
-      }
-
-      const u = await axios.patch(`http://localhost:3000/user/${user.id}`, { login: true });
-      setUser({ ...user, isAdmin: false });
-      toast.success("Login successful");
-      setTimeout(() => navigate("/"), 500);
 
     } catch (err) {
-      console.error(err);
-      toast.error("Login failed. Please try again.");
+      // Handle specific error cases from Django
+      if (err?.detail) {
+        toast.error(err.detail);
+      } else if (err?.non_field_errors) {
+        toast.error(err.non_field_errors[0]);
+      } else if (err?.email) {
+        toast.error(err.email[0]);
+      } else if (err?.password) {
+        toast.error(err.password[0]);
+      } else {
+        toast.error("Login failed. Please try again.");
+      }
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-pink-100">
-      <Toaster position="top-center" toastOptions={{duration: 800 }}reverseOrder={false} />
+      <Toaster position="top-center" toastOptions={{ duration: 800 }} reverseOrder={false} />
+      
       <form
         onSubmit={handleLogin}
         className="bg-white p-6 rounded-lg w-full max-w-md shadow-md"
@@ -92,6 +77,7 @@ function Login() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full p-3 mb-3 border rounded focus:outline-pink-400"
+          disabled={loading}
         />
 
         <input
@@ -100,13 +86,17 @@ function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="w-full p-3 mb-3 border rounded focus:outline-pink-400"
+          disabled={loading}
         />
 
         <button
           type="submit"
-          className="w-full bg-pink-500 text-white py-2 rounded hover:bg-pink-600"
+          disabled={loading}
+          className={`w-full bg-pink-500 text-white py-2 rounded hover:bg-pink-600 ${
+            loading ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         >
-          Login
+          {loading ? 'Logging in...' : 'Login'}
         </button>
 
         <Link
