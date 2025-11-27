@@ -1,36 +1,38 @@
 // src/Components/Navbar/EditProfiles/EditProfileNavbar.jsx
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
-import CartContext from "../../Context/CartContext";
-import WishlistContext from "../../Context/WishlistContext";
-import { setUser, clearUser } from "../../Redux/Slices/authSlice"; // adjust path
+import { setUser, clearUser } from "../../Redux/Slices/authSlice"; // adjust path if needed
 import { buildImageUrl } from "../../utils/image"; // adjust path if needed
 
 function Navbar() {
-  const { cartItems } = useContext(CartContext);
-  const { wish } = useContext(WishlistContext);
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // Redux sources
   const user = useSelector((state) => state.auth?.user ?? null);
+  const cartItems = useSelector((state) => state.cart?.items ?? []);
+  const wish = useSelector((state) => state.wishlist?.items ?? []);
 
-  const [cartcount, setcartcount] = useState(0);
-  const [wishcount, setwishcount] = useState(0);
+  // compute counts (no local state for counts)
+  const cartcount = React.useMemo(() => {
+    if (!Array.isArray(cartItems)) return 0;
+    // server shape: items with "quantity"
+    if (cartItems.length > 0 && Object.prototype.hasOwnProperty.call(cartItems[0], "quantity")) {
+      return cartItems.reduce((s, it) => s + Number(it.quantity || 0), 0);
+    }
+    // fallback: array length
+    return cartItems.length;
+  }, [cartItems]);
+
+  const wishcount = Array.isArray(wish) ? wish.length : 0;
+
+  // local UI state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  useEffect(() => {
-    setcartcount(Object.keys(cartItems).length);
-  }, [cartItems]);
-
-  useEffect(() => {
-    setwishcount(wish.length);
-  }, [wish]);
-
-  // sync sessionStorage user into redux store if store empty (keeps existing behavior)
+  // hydrate redux user from sessionStorage if missing
   useEffect(() => {
     if (!user) {
       try {
@@ -57,7 +59,6 @@ function Navbar() {
   const activeClass =
     "text-amber-600 font-bold relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-amber-600 after:animate-slideIn";
 
-  // build avatar URL if available
   const avatarUrl = buildImageUrl(user?.profile_picture);
 
   return (
@@ -194,7 +195,6 @@ function Navbar() {
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 font-semibold shadow-md"
               >
-                {/* show small avatar inside button if available */}
                 {avatarUrl ? (
                   <img
                     src={avatarUrl}
@@ -255,6 +255,7 @@ function Navbar() {
                       </svg>
                     </button>
                   </div>
+
                   <Link
                     to="/order"
                     className="flex items-center gap-3 px-6 py-4 hover:bg-amber-50 text-gray-700 border-b border-gray-100 transition-colors duration-200"
@@ -275,6 +276,7 @@ function Navbar() {
                     </svg>
                     My Orders
                   </Link>
+
                   <Link
                     to="/edit"
                     className="flex items-center gap-3 px-6 py-4 hover:bg-amber-50 text-gray-700 border-b border-gray-100 transition-colors duration-200"
@@ -295,6 +297,7 @@ function Navbar() {
                     </svg>
                     Edit Profile
                   </Link>
+
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-3 w-full text-left px-6 py-4 text-red-600 hover:bg-red-50 transition-colors duration-200 font-semibold"

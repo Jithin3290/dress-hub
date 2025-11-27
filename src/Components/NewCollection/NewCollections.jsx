@@ -1,20 +1,51 @@
-import React, { useEffect } from "react";
+// src/Components/NewCollections/NewCollections.jsx
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from "../../Redux/Slices/productsSlice";
-
+import Footer from "../Footer/Footer"; // keep if you render footer elsewhere
 const PLACEHOLDER = "/product/placeholder.png";
 
 function NewCollections() {
-  const dispatch = useDispatch();
-  const { items = [], loading = false } = useSelector((state) => state.products || {});
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchProducts({ limit: 8, category: "women" }));
-  }, [dispatch]);
+    const controller = new AbortController();
+    const url =
+      "http://localhost:8000/api/v1/products/?page_size=8&ordering=-created_at&category__slug=men";
 
-  // pick 8 random items
-  const products = (items || []).slice(0, 8);
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Request failed ${res.status}: ${text}`);
+        }
+        const data = await res.json();
+
+        // DRF paginated response usually has `results`. Support both shapes.
+        const items = Array.isArray(data)
+          ? data
+          : Array.isArray(data.results)
+          ? data.results
+          : [];
+
+        setProducts(items.slice(0, 8)); // keep up to 8
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error("Failed to load new collections:", err);
+          setError(err.message || "Failed to load products");
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    load();
+    return () => controller.abort();
+  }, []);
 
   if (loading) {
     return (
@@ -63,18 +94,24 @@ function NewCollections() {
         </div>
       </div>
 
+      {/* Error state */}
+      {error && (
+        <div className="text-center text-red-600 mb-8">
+          <p>Error loading products: {error}</p>
+        </div>
+      )}
+
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {products.map((item, index) => {
           const imageSrc = item.image || PLACEHOLDER;
-          const newPrice = Number(item.new_price ?? 0);
+          const newPrice = Number(item.new_price ?? item.price ?? 0);
           const oldPrice = Number(item.old_price ?? 0);
-          const avgRating = Number(item.avg_rating ?? 0);
           const reviewCount = Number(item.review_count ?? 0);
 
           return (
             <div
-              key={item.id}
+              key={item.id || index}
               className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-amber-300"
               style={{
                 animationDelay: `${index * 100}ms`,
@@ -149,10 +186,18 @@ function NewCollections() {
         })}
       </div>
 
+     
+
       <style jsx>{`
         @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
       `}</style>
     </div>

@@ -36,7 +36,7 @@ export const signupUser = createAsyncThunk(
         if (v !== undefined && v !== null) formData.append(k, v);
       });
 
-      const res = await api.post("/signup/", formData, {
+      const res = await api.post("user/signup/", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -52,7 +52,7 @@ export const loginUser = createAsyncThunk(
   async ({ email, password }, { rejectWithValue }) => {
     try {
       const res = await api.post(
-        "/login/",
+        "user/login/",
         { email, password },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -67,7 +67,7 @@ export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await api.post("/logout/blacklist/");
+      const res = await api.post("user/logout/blacklist/");
       return res.data;
     } catch (err) {
       return rejectWithValue(getAxiosError(err));
@@ -79,7 +79,7 @@ export const fetchProfile = createAsyncThunk(
   "auth/fetchProfile",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await api.get("/profile/");
+      const res = await api.get("user/profile/");
       return res.data;
     } catch (err) {
       if (err?.response?.status === 401) return rejectWithValue({ detail: "Unauthorized" });
@@ -113,7 +113,7 @@ export const updateProfile = createAsyncThunk(
       }
 
       // Adjust endpoint if your backend expects /user/:id instead of /profile/
-      const res = await api.patch("/profile/", body, config);
+      const res = await api.patch("user/profile/", body, config);
       return res.data;
     } catch (err) {
       if (err?.response?.status === 401) return rejectWithValue({ detail: "Unauthorized" });
