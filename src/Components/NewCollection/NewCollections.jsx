@@ -121,7 +121,7 @@ function NewCollections() {
               {/* New Badge */}
               <div className="absolute top-4 right-4 z-10">
                 <span className="px-3 py-1 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold rounded-full shadow-lg">
-                  NEW
+                  NEW 
                 </span>
               </div>
 

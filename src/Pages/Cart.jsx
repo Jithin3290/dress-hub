@@ -42,33 +42,45 @@ function Cart() {
   }, [user, dispatch]);
 
   // Helper: normalize cart item to get productId and quantity
-  const normalizedCart = useMemo(() => {
-    return (cartItems || []).map((item) => {
-      // server CartItem shape: { id, product: { id, name, ... }, quantity, unit_price, ... }
-      if (item?.product) {
-        return {
-          cartItemId: item.id ?? item.pk ?? null,
-          productId: item.product.id,
-          productObj: item.product,
-          quantity: Number(item.quantity || 0),
-          unit_price: item.unit_price ?? item.product.new_price ?? item.product.price ?? 0,
-          raw: item,
-        };
-      }
-      // fallback shape: { id: <productId>, quantity, date }
+ // replace existing normalizedCart useMemo with this
+const normalizedCart = useMemo(() => {
+  if (!Array.isArray(cartItems)) return [];
+
+  return cartItems.map((item) => {
+    // server uses product_detail in your response
+    const pd = item.product_detail ?? item.product ?? item.productObj ?? null;
+
+    if (pd && typeof pd === "object") {
+      // product object is available from server
       return {
-        cartItemId: item.id ?? null,
-        productId: item.id,
-        productObj: products.find((p) => String(p.id) === String(item.id)) ?? null,
-        quantity: Number(item.quantity || 0),
-        unit_price:
-          item.unit_price ??
-          products.find((p) => String(p.id) === String(item.id))?.new_price ??
-          0,
+        cartItemId: item.id ?? item.pk ?? null,
+        productId: pd.id,
+        productObj: pd,
+        quantity: Number(item.quantity ?? 0),
+        // new_price sometimes comes as string, convert safely
+        unit_price: Number(pd.new_price ?? pd.price ?? item.unit_price ?? 0),
+        size: item.size ?? null,
         raw: item,
       };
-    });
-  }, [cartItems, products]);
+    }
+
+    // fallback: product is just an id or missing; try to resolve from products list
+    const pid = item.product ?? item.product_id ?? item.id;
+    const productObj = products.find((p) => String(p.id) === String(pid)) || null;
+
+    return {
+      cartItemId: item.id ?? null,
+      productId: pid,
+      productObj,
+      quantity: Number(item.quantity ?? 0),
+      unit_price:
+        Number(item.unit_price ?? (productObj ? productObj.new_price ?? productObj.price ?? 0 : 0)),
+      size: item.size ?? null,
+      raw: item,
+    };
+  });
+}, [cartItems, products]);
+
 
   // total price computed from normalizedCart
   const totalPrice = useMemo(() => {
@@ -105,20 +117,22 @@ function Cart() {
     }
   };
 
-  const handleRemove = async (productId, cartItemId) => {
-    const lockId = cartItemId ?? productId;
-    setUpdating(lockId, true);
-    try {
-      await dispatch(removeCartItem(productId)).unwrap();
-      toast.success("Removed from cart");
-    } catch (err) {
-      console.error("Remove failed:", err);
-      const msg = err?.message || err?.detail || "Failed to remove item";
-      toast.error(String(msg));
-    } finally {
-      setUpdating(lockId, false);
-    }
-  };
+const handleRemove = async (productId, cartItemId, size = null) => {
+  const lockId = cartItemId ?? productId ?? `${productId}:${size ?? ""}`;
+  setUpdating(lockId, true);
+  try {
+    // pass an object — thunk expects { productId, size, cartItemId }
+    await dispatch(removeCartItem({ productId, size, cartItemId })).unwrap();
+    toast.success("Removed from cart");
+  } catch (err) {
+    console.error("Remove failed:", err);
+    const msg = err?.detail ?? err?.message ?? "Failed to remove item";
+    toast.error(String(msg));
+  } finally {
+    setUpdating(lockId, false);
+  }
+};
+
 
   const handleBuyNow = async (productId) => {
     if (!user?.login) {
@@ -198,6 +212,8 @@ function Cart() {
                   <h3 className="font-semibold">{product.name}</h3>
                   <p className="text-gray-500">₹{it.unit_price}</p>
                   <p className="text-sm">Quantity: {it.quantity}</p>
+                  <p className="text-sm">Size: {it.size}</p>
+               
                   {it.raw?.added_at || it.raw?.date ? (
                     <p className="text-xs text-gray-400 mt-1">
                       Added on:{" "}
@@ -222,11 +238,11 @@ function Cart() {
                     </button>
 
                     <span className="px-2">{it.quantity}</span>
-
+                    
                     <button
                       className={`px-2 py-1 rounded ${it.quantity >= 99 ? "bg-gray-300 cursor-not-allowed" : "bg-gray-200"}`}
                       onClick={() => {
-                        if (it.quantity >= 99) {
+                        if (it.quantity >= 5) {
                           toast.error("Maximum quantity reached");
                           return;
                         }

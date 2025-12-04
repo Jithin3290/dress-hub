@@ -14,16 +14,15 @@ function Navbar() {
   const user = useSelector((state) => state.auth?.user ?? null);
   const cartItems = useSelector((state) => state.cart?.items ?? []);
   const wish = useSelector((state) => state.wishlist?.items ?? []);
-
   // compute counts (no local state for counts)
   const cartcount = React.useMemo(() => {
-    if (!Array.isArray(cartItems)) return 0;
-    // server shape: items with "quantity"
-    if (cartItems.length > 0 && Object.prototype.hasOwnProperty.call(cartItems[0], "quantity")) {
-      return cartItems.reduce((s, it) => s + Number(it.quantity || 0), 0);
-    }
-    // fallback: array length
-    return cartItems.length;
+  if (!Array.isArray(cartItems)) return 0;
+    const ids = new Set(
+      cartItems.map(it =>
+        String(it.product_detail?.id ?? it.product?.id ?? it.product_id ?? it.id ?? "")
+      ).filter(Boolean)
+    );
+    return ids.size;
   }, [cartItems]);
 
   const wishcount = Array.isArray(wish) ? wish.length : 0;

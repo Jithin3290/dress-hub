@@ -31,7 +31,7 @@ function Login() {
 
     try {
       const result = await dispatch(loginUser({ email, password })).unwrap();
-      
+      // dispatch(fetchRecentlyWatched());
       toast.success("Login successful");
       
       // Check if user is admin based on the response

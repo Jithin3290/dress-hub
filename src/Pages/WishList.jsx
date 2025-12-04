@@ -4,10 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaHeart } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
-import api from "../user_api";
 
 import { fetchWishlist, removeWishlistItem, clearWishLocal } from "../Redux/Slices/wishlistSlice";
-import { setCartLocal } from "../Redux/Slices/cartSlice";
 
 export default function WishList() {
   const dispatch = useDispatch();
