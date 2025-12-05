@@ -13,6 +13,8 @@ import {
   checkoutCart,
 } from "../Redux/Slices/cartSlice"; // adjust path if needed
 
+import { setCheckoutItems } from "../Redux/Slices/orderSlice"; // ensure this exists and path is correct
+
 function Cart() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -42,45 +44,41 @@ function Cart() {
   }, [user, dispatch]);
 
   // Helper: normalize cart item to get productId and quantity
- // replace existing normalizedCart useMemo with this
-const normalizedCart = useMemo(() => {
-  if (!Array.isArray(cartItems)) return [];
+  const normalizedCart = useMemo(() => {
+    if (!Array.isArray(cartItems)) return [];
 
-  return cartItems.map((item) => {
-    // server uses product_detail in your response
-    const pd = item.product_detail ?? item.product ?? item.productObj ?? null;
+    return cartItems.map((item) => {
+      // server may include product_detail or similar, try likely keys
+      const pd = item.product_detail ?? item.product ?? item.productObj ?? null;
 
-    if (pd && typeof pd === "object") {
-      // product object is available from server
+      if (pd && typeof pd === "object") {
+        return {
+          cartItemId: item.id ?? item.pk ?? null,
+          productId: pd.id,
+          productObj: pd,
+          quantity: Number(item.quantity ?? 0),
+          unit_price: Number(pd.new_price ?? pd.price ?? item.unit_price ?? 0),
+          size: item.size ?? null,
+          raw: item,
+        };
+      }
+
+      // fallback: product is just an id or missing; try to resolve from products list
+      const pid = item.product ?? item.product_id ?? item.id;
+      const productObj = products.find((p) => String(p.id) === String(pid)) || null;
+
       return {
-        cartItemId: item.id ?? item.pk ?? null,
-        productId: pd.id,
-        productObj: pd,
+        cartItemId: item.id ?? null,
+        productId: pid,
+        productObj,
         quantity: Number(item.quantity ?? 0),
-        // new_price sometimes comes as string, convert safely
-        unit_price: Number(pd.new_price ?? pd.price ?? item.unit_price ?? 0),
+        unit_price:
+          Number(item.unit_price ?? (productObj ? productObj.new_price ?? productObj.price ?? 0 : 0)),
         size: item.size ?? null,
         raw: item,
       };
-    }
-
-    // fallback: product is just an id or missing; try to resolve from products list
-    const pid = item.product ?? item.product_id ?? item.id;
-    const productObj = products.find((p) => String(p.id) === String(pid)) || null;
-
-    return {
-      cartItemId: item.id ?? null,
-      productId: pid,
-      productObj,
-      quantity: Number(item.quantity ?? 0),
-      unit_price:
-        Number(item.unit_price ?? (productObj ? productObj.new_price ?? productObj.price ?? 0 : 0)),
-      size: item.size ?? null,
-      raw: item,
-    };
-  });
-}, [cartItems, products]);
-
+    });
+  }, [cartItems, products]);
 
   // total price computed from normalizedCart
   const totalPrice = useMemo(() => {
@@ -117,32 +115,54 @@ const normalizedCart = useMemo(() => {
     }
   };
 
-const handleRemove = async (productId, cartItemId, size = null) => {
-  const lockId = cartItemId ?? productId ?? `${productId}:${size ?? ""}`;
-  setUpdating(lockId, true);
-  try {
-    // pass an object — thunk expects { productId, size, cartItemId }
-    await dispatch(removeCartItem({ productId, size, cartItemId })).unwrap();
-    toast.success("Removed from cart");
-  } catch (err) {
-    console.error("Remove failed:", err);
-    const msg = err?.detail ?? err?.message ?? "Failed to remove item";
-    toast.error(String(msg));
-  } finally {
-    setUpdating(lockId, false);
-  }
-};
+  const handleRemove = async (productId, cartItemId, size = null) => {
+    const lockId = cartItemId ?? productId ?? `${productId}:${size ?? ""}`;
+    setUpdating(lockId, true);
+    try {
+      // pass an object — thunk expects { productId, size, cartItemId }
+      await dispatch(removeCartItem({ productId, size, cartItemId })).unwrap();
+      toast.success("Removed from cart");
+    } catch (err) {
+      console.error("Remove failed:", err);
+      const msg = err?.detail ?? err?.message ?? "Failed to remove item";
+      toast.error(String(msg));
+    } finally {
+      setUpdating(lockId, false);
+    }
+  };
 
-
-  const handleBuyNow = async (productId) => {
+  // SINGLE-ITEM BUY NOW (from cart list)
+  const handleBuyNow = async (productId, cartItemId) => {
     if (!user?.login) {
       toast.error("Please login to continue");
       return;
     }
 
     try {
-      // ideally you'd create an order object server-side; this keeps current app flow:
-      await dispatch(removeCartItem(productId)).unwrap();
+      // Find the normalized item corresponding to this productId/cartItemId
+      const it = normalizedCart.find((x) => {
+        if (cartItemId) return String(x.cartItemId) === String(cartItemId);
+        return String(x.productId) === String(productId);
+      });
+
+      if (!it) {
+        toast.error("Item not found");
+        return;
+      }
+
+      // Build single-item payload matching backend shape
+      const singleItem = {
+        product: it.productId,
+        quantity: it.quantity,
+        size: it.size || "",
+        shipping_address: "", // leave empty, payment page can collect
+        phone: "",
+      };
+
+      // Set checkoutItems in ordersSlice (this does NOT clear cart)
+      dispatch(setCheckoutItems([singleItem]));
+
+      // Navigate to payment page (payment page reads ordersSlice.checkoutItems first)
       navigate("/payment");
     } catch (err) {
       console.error("Buy now failed:", err);
@@ -150,6 +170,7 @@ const handleRemove = async (productId, cartItemId, size = null) => {
     }
   };
 
+  // CHECKOUT ENTIRE CART (Buy All)
   const handleBuyAll = async () => {
     if (!user?.login) {
       toast.error("Please login to continue");
@@ -157,7 +178,24 @@ const handleRemove = async (productId, cartItemId, size = null) => {
     }
 
     try {
-      await dispatch(checkoutCart({ clearAfter: true })).unwrap();
+      if (!normalizedCart || normalizedCart.length === 0) {
+        toast.error("Your cart is empty");
+        return;
+      }
+
+      // Build array payload from normalizedCart
+      const payload = normalizedCart.map((it) => ({
+        product: it.productId,
+        quantity: it.quantity,
+        size: it.size || "",
+        shipping_address: "", // payment page can collect
+        phone: "",
+      }));
+
+      // Set these as checkout items (so payment page will pay only these)
+      dispatch(setCheckoutItems(payload));
+
+      // Navigate to payment
       navigate("/payment");
     } catch (err) {
       console.error("Checkout failed:", err);
@@ -213,7 +251,7 @@ const handleRemove = async (productId, cartItemId, size = null) => {
                   <p className="text-gray-500">₹{it.unit_price}</p>
                   <p className="text-sm">Quantity: {it.quantity}</p>
                   <p className="text-sm">Size: {it.size}</p>
-               
+
                   {it.raw?.added_at || it.raw?.date ? (
                     <p className="text-xs text-gray-400 mt-1">
                       Added on:{" "}
@@ -238,7 +276,7 @@ const handleRemove = async (productId, cartItemId, size = null) => {
                     </button>
 
                     <span className="px-2">{it.quantity}</span>
-                    
+
                     <button
                       className={`px-2 py-1 rounded ${it.quantity >= 99 ? "bg-gray-300 cursor-not-allowed" : "bg-gray-200"}`}
                       onClick={() => {
@@ -262,7 +300,7 @@ const handleRemove = async (productId, cartItemId, size = null) => {
               <div className="flex flex-col sm:flex-row items-center gap-2">
                 <button
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                  onClick={() => handleBuyNow(it.productId)}
+                  onClick={() => handleBuyNow(it.productId, it.cartItemId)}
                   disabled={updating}
                 >
                   Buy Now
