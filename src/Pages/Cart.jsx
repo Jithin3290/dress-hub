@@ -41,6 +41,7 @@ function Cart() {
     if (user?.login) {
       dispatch(fetchCart());
     }
+    dispatch(fetchCart());
   }, [user, dispatch]);
 
   // Helper: normalize cart item to get productId and quantity
@@ -133,10 +134,10 @@ function Cart() {
 
   // SINGLE-ITEM BUY NOW (from cart list)
   const handleBuyNow = async (productId, cartItemId) => {
-    if (!user?.login) {
-      toast.error("Please login to continue");
-      return;
-    }
+    // if (!user?.login) {
+    //   toast.error("Please login to continue");
+    //   return;
+    // }
 
     try {
       // Find the normalized item corresponding to this productId/cartItemId
@@ -172,10 +173,10 @@ function Cart() {
 
   // CHECKOUT ENTIRE CART (Buy All)
   const handleBuyAll = async () => {
-    if (!user?.login) {
-      toast.error("Please login to continue");
-      return;
-    }
+    // if (!user?.login) {
+    //   toast.error("Please login to continue");
+    //   return;
+    // }
 
     try {
       if (!normalizedCart || normalizedCart.length === 0) {

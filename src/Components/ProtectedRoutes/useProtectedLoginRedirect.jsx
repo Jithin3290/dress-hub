@@ -1,9 +1,10 @@
 import { useEffect, useContext} from 'react';
 import { useNavigate } from 'react-router-dom';
-import AuthContext from '../../Context/AuthContext';
+import { useSelector } from "react-redux";
 
 function useProtectedLoginRedirect() {
-  const { user } = useContext(AuthContext);
+  const auth = useSelector((s) => s.auth || {});
+  const user = auth.user;
   const navigate = useNavigate();
 
   useEffect(() => {
