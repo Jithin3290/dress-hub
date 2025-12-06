@@ -1,15 +1,19 @@
 // src/redux/ordersSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-
-/* Assumes axios.defaults.baseURL and axios auth header set elsewhere */
+import api from "../../user_api"; // <- use your axios instance
 
 // --- Async thunks ---
+// If you need the token from state, use getState() below and set header per-request.
+
 export const fetchUserOrders = createAsyncThunk(
   "orders/fetchUserOrders",
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
-      const res = await axios.get("/api/order/my-orders/");
+      // example: attach token from state if you store it
+      const token = getState().auth?.accessToken;
+      if (token) api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      const res = await api.get("order/my-orders/"); // final URL: http://localhost:8000/api/v1/order/my-orders/
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -19,9 +23,12 @@ export const fetchUserOrders = createAsyncThunk(
 
 export const codCheckout = createAsyncThunk(
   "orders/codCheckout",
-  async (payload /* { orders: [...] } */, { rejectWithValue }) => {
+  async (payload /* { orders: [...] } */, { rejectWithValue, getState }) => {
     try {
-      const res = await axios.post("/api/order/checkout/cod/", payload);
+      const token = getState().auth?.accessToken;
+      if (token) api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      const res = await api.post("order/checkout/cod/", payload);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -31,9 +38,12 @@ export const codCheckout = createAsyncThunk(
 
 export const createRazorpayOrder = createAsyncThunk(
   "orders/createRazorpayOrder",
-  async (payload /* { orders: [...] } */, { rejectWithValue }) => {
+  async (payload /* { orders: [...] } */, { rejectWithValue, getState }) => {
     try {
-      const res = await axios.post("/api/order/checkout/razorpay/create/", payload);
+      const token = getState().auth?.accessToken;
+      if (token) api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      const res = await api.post("order/checkout/razorpay/create/", payload);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -45,10 +55,13 @@ export const verifyRazorpayPayment = createAsyncThunk(
   "orders/verifyRazorpayPayment",
   async (
     payload /* { razorpay_payment_id, razorpay_order_id, razorpay_signature, orders_payload } */,
-    { rejectWithValue }
+    { rejectWithValue, getState }
   ) => {
     try {
-      const res = await axios.post("/api/order/checkout/razorpay/verify/", payload);
+      const token = getState().auth?.accessToken;
+      if (token) api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      const res = await api.post("order/checkout/razorpay/verify/", payload);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -58,9 +71,12 @@ export const verifyRazorpayPayment = createAsyncThunk(
 
 export const updateOrderAddress = createAsyncThunk(
   "orders/updateOrderAddress",
-  async ({ order_id, shipping_address }, { rejectWithValue }) => {
+  async ({ order_id, shipping_address }, { rejectWithValue, getState }) => {
     try {
-      const res = await axios.patch(`/api/order/${order_id}/update-address/`, { shipping_address });
+      const token = getState().auth?.accessToken;
+      if (token) api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      const res = await api.patch(`order/${order_id}/update-address/`, { shipping_address });
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -70,9 +86,12 @@ export const updateOrderAddress = createAsyncThunk(
 
 export const fetchNotifications = createAsyncThunk(
   "orders/fetchNotifications",
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
-      const res = await axios.get("/api/order/notifications/");
+      const token = getState().auth?.accessToken;
+      if (token) api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      const res = await api.get("order/notifications/");
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -82,9 +101,12 @@ export const fetchNotifications = createAsyncThunk(
 
 export const markNotificationRead = createAsyncThunk(
   "orders/markNotificationRead",
-  async (payload /* { id? } or {} to mark all */, { rejectWithValue }) => {
+  async (payload /* { id? } or {} to mark all */, { rejectWithValue, getState }) => {
     try {
-      const res = await axios.patch("/api/order/notifications/", payload || {});
+      const token = getState().auth?.accessToken;
+      if (token) api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      const res = await api.patch("order/notifications/", payload || {});
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -92,14 +114,15 @@ export const markNotificationRead = createAsyncThunk(
   }
 );
 
+
 // --- Slice ---
 const initialState = {
   orders: [],
   notifications: [],
-  loading: false,        // general loading flag for list/create/verify
+  loading: false,
   checkoutLoading: false,
-  createOrderData: null, // response from createRazorpayOrder or codCheckout
-  verifyResult: null,    // response from verifyRazorpayPayment
+  createOrderData: null,
+  verifyResult: null,
   error: null,
   checkoutItems: null,
 };
@@ -117,11 +140,11 @@ const ordersSlice = createSlice({
       state.error = null;
     },
     setCheckoutItems(state, action) {
-    state.checkoutItems = action.payload; // array of items
-  },
-  clearCheckoutItems(state) {
-    state.checkoutItems = null;
-  },
+      state.checkoutItems = action.payload;
+    },
+    clearCheckoutItems(state) {
+      state.checkoutItems = null;
+    },
   },
   extraReducers: (builder) => {
     // fetchUserOrders
@@ -220,5 +243,5 @@ const ordersSlice = createSlice({
   },
 });
 
-export const { clearOrderState, clearError,setCheckoutItems, clearCheckoutItems } = ordersSlice.actions;
+export const { clearOrderState, clearError, setCheckoutItems, clearCheckoutItems } = ordersSlice.actions;
 export default ordersSlice.reducer;
