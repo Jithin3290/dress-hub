@@ -21,6 +21,7 @@ function NewCollections() {
         const res = await fetch(url, { signal: controller.signal });
         if (!res.ok) {
           const text = await res.text();
+          console.log(text)
           throw new Error(`Request failed ${res.status}: ${text}`);
         }
         const data = await res.json();
@@ -140,7 +141,7 @@ function NewCollections() {
                   <img
                     src={imageSrc}
                     alt={item.name}
-                    className="w-full h-72 object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="w-full h-112 object-cover transition-transform duration-700 group-hover:scale-110"
                     onError={(e) => {
                       e.currentTarget.src = PLACEHOLDER;
                     }}

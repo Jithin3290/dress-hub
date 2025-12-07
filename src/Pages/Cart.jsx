@@ -41,7 +41,6 @@ function Cart() {
     if (user?.login) {
       dispatch(fetchCart());
     }
-    dispatch(fetchCart());
   }, [user, dispatch]);
 
   // Helper: normalize cart item to get productId and quantity

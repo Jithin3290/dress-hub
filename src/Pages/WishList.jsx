@@ -15,7 +15,7 @@ export default function WishList() {
   const user = useSelector((s) => s.auth?.user ?? null);
   const wishlist = useSelector((s) => s.wishlist ?? { items: [], raw: [], loading: false, error: null });
   const cartItemsFromStore = useSelector((s) => s.cart?.items ?? null);
-
+  
   const { items: wishIds = [], raw: wishRaw = [], loading: wishLoading = false, error: wishError = null } = wishlist;
 
   useEffect(() => {
@@ -70,10 +70,8 @@ export default function WishList() {
     [dispatch]
   );
 
-  // ... addToCart and handleBuyNow same as earlier (keep from your file)
 
   if (wishLoading) return <div className="text-center p-8"><p className="font-semibold">Loading wishlist...</p></div>;
-console.log(wishListProducts)
   return (
     <div className="p-6">
       <h1 className="text-2xl font-semibold text-center mb-4">Your Wishlist</h1>
@@ -96,9 +94,7 @@ console.log(wishListProducts)
               <p className="text-gray-700">₹{product.new_price ?? product.price ?? "—"}</p>
 
               <div className="flex gap-2 mt-3">
-                <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded" onClick={() => {/* handleBuyNow or reuse your handler */}}>
-                  Buy Now
-                </button>
+               
                 <Link to={`/product/${product.id}`}><button className="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300">View</button></Link>
               </div>
             </div>

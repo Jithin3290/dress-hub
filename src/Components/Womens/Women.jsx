@@ -20,7 +20,6 @@ const ProductCard = React.memo(({ product, isWished, toggleWishlist, style }) =>
       aria-label={isWished ? "Remove from wishlist" : "Add to wishlist"}
     >
       {isWished ? (
-        // Filled heart (red)
         <svg
           className="w-5 h-5 text-red-500"
           fill="currentColor"
@@ -29,7 +28,6 @@ const ProductCard = React.memo(({ product, isWished, toggleWishlist, style }) =>
           <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
         </svg>
       ) : (
-        // Outline heart (gray, turns red on hover)
         <svg
           className="w-5 h-5 text-gray-400 group-hover:text-red-400 transition-colors duration-300"
           fill="none"
@@ -59,10 +57,11 @@ const ProductCard = React.memo(({ product, isWished, toggleWishlist, style }) =>
     {/* Product Image */}
     <Link to={`/product/${product.id}`}>
       <div className="relative overflow-hidden bg-gray-100">
+        {/* <-- changed h-80 to h-112 to match Men page image sizing/behavior --> */}
         <img
           src={product.image ?? "/placeholder.png"}
           alt={product.name ?? "Product image"}
-          className="w-full h-80 object-cover transition-transform duration-700 group-hover:scale-110"
+          className="w-full h-112 object-cover transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
@@ -117,17 +116,7 @@ const ProductCard = React.memo(({ product, isWished, toggleWishlist, style }) =>
         </span>
       </div>
 
-      <div className="flex items-center gap-2 mt-4">
-        <div className="flex text-amber-400">
-          {[...Array(5)].map((_, i) => (
-            <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-          ))}
-        </div>
-        <span className="text-sm text-gray-500 font-medium">4.8</span>
-        <span className="text-xs text-gray-400">(256)</span>
-      </div>
+   
     </div>
 
     <div className="absolute inset-0 border-2 border-transparent group-hover:border-pink-300 rounded-2xl transition-all duration-500 pointer-events-none"></div>
@@ -181,7 +170,6 @@ function Women() {
     return products.filter((item) => {
       const cat = item?.category;
       if (!cat) return false;
-      // category might be string, object with slug/name, or id
       if (typeof cat === "string") {
         return cat.toLowerCase() === "women" || cat.toLowerCase() === "women's";
       }
@@ -241,12 +229,11 @@ function Women() {
 
       {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-6 py-16">
-        {/* optional wishlist loading hint */}
         {wishlistLoading && (
           <div className="text-sm text-gray-500 mb-4">Loading wishlist…</div>
         )}
    
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className=" grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 :grid-cols-4 gap-8">
           {filteredProducts.map((product, index) => {
             const idStr = String(product.id);
             const isWished = Array.isArray(wishItems) && wishItems.includes(idStr);
@@ -261,6 +248,7 @@ function Women() {
                   animationDelay: `${index * 100}ms`,
                   animation: `fadeInUp 0.6s ease-out ${index * 100}ms both`,
                 }}
+                
               />
             );
           })}
@@ -270,7 +258,7 @@ function Women() {
           <div className="text-center py-16">
             <div className="text-gray-400 text-6xl mb-4">👗</div>
             <h3 className="text-xl font-semibold text-gray-600 mb-2">No products found</h3>
-            <p className="text-gray-500">Try adjusting your filter criteria</p>
+            <p className="text-gray-500">Try adjusting your filter criteria </p>
           </div>
         )}
       </div>

@@ -3,8 +3,11 @@ import React, { useEffect, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
-import { setUser, clearUser } from "../../Redux/Slices/authSlice"; // adjust path if needed
-import { buildImageUrl } from "../../utils/image"; // adjust path if needed
+import { setUser, clearUser } from "../../Redux/Slices/authSlice"; 
+import { buildImageUrl } from "../../utils/image"; 
+import api  from "../../user_api";
+import { fetchWishlist, clearWishLocal } from "../../Redux/Slices/wishlistSlice";
+import {fetchCart,clearLocalCart} from "../../Redux/Slices/cartSlice"
 
 function Navbar() {
   const dispatch = useDispatch();
@@ -15,6 +18,12 @@ function Navbar() {
   const cartItems = useSelector((state) => state.cart?.items ?? []);
   const wish = useSelector((state) => state.wishlist?.items ?? []);
   // compute counts (no local state for counts)
+    useEffect(() => {
+      if (user) {
+        dispatch(fetchWishlist());
+        dispatch(fetchCart()); 
+      }
+    }, [user, dispatch]);
   const cartcount = React.useMemo(() => {
   if (!Array.isArray(cartItems)) return 0;
     const ids = new Set(
@@ -46,14 +55,27 @@ function Navbar() {
     }
   }, [user, dispatch]);
 
-  const handleLogout = () => {
-    toast.success("Logged out");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("recentlyWatched");
-    dispatch(clearUser());
-    setShowDropdown(false);
-    navigate("/login", { replace: true });
-  };
+const handleLogout = async () => {
+  try {
+    // call backend so it can delete HttpOnly cookies
+    await api.post("user/logout/", {}, { withCredentials: true });
+  } catch (err) {
+    console.warn("Backend logout failed, continuing client cleanup", err);
+  }
+
+  // cleanup client-only state
+  sessionStorage.removeItem("user");
+  sessionStorage.removeItem("recentlyWatched");
+  dispatch(clearUser())
+  dispatch(clearWishLocal());
+  dispatch(clearLocalCart())
+
+  toast.success("Logged out");
+  setShowDropdown(false);
+  navigate("/", { replace: true });
+};
+
+
 
   const activeClass =
     "text-amber-600 font-bold relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-amber-600 after:animate-slideIn";

@@ -20,13 +20,7 @@ const getAxiosError = (err) => {
   return { detail: err.message || "Network error" };
 };
 
-/**
- * Thunks using axios instance (api should have baseURL and auth interceptors)
- */
 
-/**
- * payload: { email, name, phone_number, password1, password2, profile_picture? }
- */
 export const signupUser = createAsyncThunk(
   "auth/signupUser",
   async (payload, { rejectWithValue }) => {
@@ -36,9 +30,7 @@ export const signupUser = createAsyncThunk(
         if (v !== undefined && v !== null) formData.append(k, v);
       });
 
-      const res = await api.post("user/signup/", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await api.post("user/signup/", formData)
 
       return res.data;
     } catch (err) {
@@ -149,9 +141,6 @@ const authSlice = createSlice({
       })
       .addCase(signupUser.fulfilled, (state, action) => {
         state.loading = false;
-        const user = action.payload.user ?? action.payload;
-        state.user = user;
-        sessionStorage.setItem("user", JSON.stringify(user));
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.loading = false;

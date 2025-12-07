@@ -8,8 +8,8 @@ import api from "../user_api";
 
 import { fetchProduct } from "../Redux/Slices/productsSlice";
 import { addCartItem, fetchCart } from "../Redux/Slices/cartSlice";
-import { addRecentlyWatched } from "../Redux/Slices/recentlywatchedSlice";
 import { setCheckoutItems } from "../Redux/Slices/orderSlice"; 
+import { addRecentlyWatched } from "../Redux/Slices/recentlywatchedSlice";
 
 function safeCategoryName(cat) {
   if (!cat) return "Fashion";
@@ -60,15 +60,7 @@ function Product() {
 
     dispatch(addRecentlyWatched(mini));
 
-    (async () => {
-      try {
-        await api.post(
-          "recently-watched/",
-          { product_id: product.id },
-          { withCredentials: true }
-        );
-      } catch {}
-    })();
+  
   }, [dispatch, product]);
 
   // Auto-select first in-stock size
@@ -140,8 +132,8 @@ function Product() {
 
       toast.success("Added to cart");
     } catch (err) {
-      console.error("addCartItem failed:", err);
-      toast.error("Failed to add to cart");
+      
+      navigate("/login");
     }
   };
 
