@@ -10,42 +10,42 @@ function NewCollections() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let mounted = true;
     const url =
       "http://localhost:8000/api/v1/products/?page_size=8&ordering=-created_at&category__slug=men";
 
     async function load() {
+      if (!mounted) return;
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(url, { signal: controller.signal });
+        const res = await fetch(url);
         if (!res.ok) {
           const text = await res.text();
-          console.log(text)
           throw new Error(`Request failed ${res.status}: ${text}`);
         }
         const data = await res.json();
 
-        // DRF paginated response usually has `results`. Support both shapes.
         const items = Array.isArray(data)
           ? data
           : Array.isArray(data.results)
           ? data.results
           : [];
 
-        setProducts(items.slice(0, 8)); // keep up to 8
+        if (mounted) setProducts(items.slice(0, 8));
       } catch (err) {
-        if (err.name !== "AbortError") {
-          console.error("Failed to load new collections:", err);
-          setError(err.message || "Failed to load products");
-        }
+        // No AbortController here, so just report real errors
+        console.error("Failed to load new collections:", err);
+        if (mounted) setError(err.message || "Failed to load products");
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     }
 
     load();
-    return () => controller.abort();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   if (loading) {
@@ -136,7 +136,7 @@ function NewCollections() {
               )}
 
               {/* Image */}
-              <Link to={`/product/${item.id}`}>
+                <Link to={"/mens"} state={{formList: true}}>
                 <div className="relative overflow-hidden bg-gray-100">
                   <img
                     src={imageSrc}

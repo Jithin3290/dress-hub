@@ -8,7 +8,7 @@ import { buildImageUrl } from "../../utils/image";
 import api  from "../../user_api";
 import { fetchWishlist, clearWishLocal } from "../../Redux/Slices/wishlistSlice";
 import {fetchCart,clearLocalCart} from "../../Redux/Slices/cartSlice"
-
+import { clearRecentlyWatched } from "../../Redux/Slices/recentlywatchedSlice";
 function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -66,10 +66,11 @@ const handleLogout = async () => {
   // cleanup client-only state
   sessionStorage.removeItem("user");
   sessionStorage.removeItem("recentlyWatched");
+  localStorage.clear();
   dispatch(clearUser())
   dispatch(clearWishLocal());
   dispatch(clearLocalCart())
-
+  dispatch(clearRecentlyWatched())
   toast.success("Logged out");
   setShowDropdown(false);
   navigate("/", { replace: true });

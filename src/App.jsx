@@ -31,11 +31,13 @@ const Careers = lazy(() => import("./Components/Footer/Careers"));
 const Contact = lazy(() => import("./Components/Footer/Contact"));
 
 // App-level bootstrap component that hydrates auth on start
+
 function AppBootstrap({ children }) {
+  const user = useSelector((state) => state.auth?.user ?? null);
+
   const dispatch = useDispatch();
   useEffect(() => {
-    // If cookie-based auth is used, this will hit /user/profile/ with credentials and populate auth state
-    dispatch(fetchProfile());
+    if(user)dispatch(fetchProfile());
   }, [dispatch]);
 
   return children;

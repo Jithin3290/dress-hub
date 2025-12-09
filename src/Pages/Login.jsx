@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import toast, { Toaster } from 'react-hot-toast';
 import useProtectedLoginRedirect from '../Components/ProtectedRoutes/useProtectedLoginRedirect';
-import { loginUser } from '../Redux/Slices/authSlice'; 
+import { loginUser } from '../Redux/Slices/authSlice';
+
 function Login() {
   useProtectedLoginRedirect();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.auth);
+  const { loading } = useSelector((state) => state.auth || {});
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  // errors: { email: '', password: '', non_field: '' }
+  const [errors, setErrors] = useState({});
 
   const validateEmail = (email) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -19,75 +21,99 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    const newErrors = {};
+
     if (!validateEmail(email)) {
-      toast.error("Enter a valid email");
-      return;
+      newErrors.email = 'Enter a valid email';
     }
 
     if (!password.trim()) {
-      toast.error("Password is required");
+      newErrors.password = 'Password is required';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
+    // clear previous errors
+    setErrors({});
+
     try {
       const result = await dispatch(loginUser({ email, password })).unwrap();
-      // dispatch(fetchRecentlyWatched());
-      toast.success("Login successful");
-      
-      // Check if user is admin based on the response
+
+      // preserve your behavior: redirect and admin check
       if (result.user?.is_staff || result.user?.is_superuser || result.isAdmin) {
-        // Admin user - redirect to admin panel
         setTimeout(() => {
-          window.location.href = "/admin";
+          window.location.href = '/admin';
         }, 100);
       } else {
-        // Regular user - redirect to home
-        setTimeout(() => navigate("/"), 500);
+        setTimeout(() => navigate('/'), 500);
+      }
+    } catch (err) {
+      // Normalize common Django/DRF shapes
+      const apiErr = {};
+      if (err?.detail) apiErr.non_field = err.detail;
+      if (err?.non_field_errors) apiErr.non_field = err.non_field_errors[0];
+      if (err?.email) apiErr.email = err.email[0];
+      if (err?.password) apiErr.password = err.password[0];
+
+      // axios-like nesting
+      if (!Object.keys(apiErr).length) {
+        if (err?.response?.data) {
+          const d = err.response.data;
+          if (d.detail) apiErr.non_field = d.detail;
+          if (d.non_field_errors) apiErr.non_field = d.non_field_errors[0];
+          if (d.email) apiErr.email = d.email[0];
+          if (d.password) apiErr.password = d.password[0];
+        }
       }
 
-    } catch (err) {
-      // Handle specific error cases from Django
-      if (err?.detail) {
-        toast.error(err.detail);
-      } else if (err?.non_field_errors) {
-        toast.error(err.non_field_errors[0]);
-      } else if (err?.email) {
-        toast.error(err.email[0]);
-      } else if (err?.password) {
-        toast.error(err.password[0]);
-      } else {
-        toast.error("Login failed. Please try again.");
+      if (!Object.keys(apiErr).length) {
+        apiErr.non_field = 'Login failed. Please try again.';
       }
+
+      setErrors(apiErr);
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-pink-100">
-      <Toaster position="top-center" toastOptions={{ duration: 800 }} reverseOrder={false} />
-      
       <form
         onSubmit={handleLogin}
         className="bg-white p-6 rounded-lg w-full max-w-md shadow-md"
       >
         <h1 className="text-2xl font-bold text-center mb-4">Login</h1>
 
+        {errors.non_field && (
+          <p className="text-red-500 text-sm mb-2 text-center">{errors.non_field}</p>
+        )}
+
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 mb-3 border rounded focus:outline-pink-400"
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setErrors((prev) => ({ ...prev, email: '' }));
+          }}
+          className="w-full p-3 mb-1 border rounded focus:outline-pink-400"
           disabled={loading}
         />
+        {errors.email && <p className="text-red-500 text-sm mb-3">{errors.email}</p>}
 
         <input
           type="password"
           placeholder="Password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 mb-3 border rounded focus:outline-pink-400"
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setErrors((prev) => ({ ...prev, password: '' }));
+          }}
+          className="w-full p-3 mb-1 border rounded focus:outline-pink-400"
           disabled={loading}
         />
+        {errors.password && <p className="text-red-500 text-sm mb-3">{errors.password}</p>}
 
         <button
           type="submit"

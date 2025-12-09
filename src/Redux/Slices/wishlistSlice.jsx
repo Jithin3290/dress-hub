@@ -28,7 +28,6 @@ export const fetchWishlist = createAsyncThunk(
     try {
       const res = await api.get("/wishlist/");
       const data = res.data;
-      console.log(data)
       const normalized = normalizeWishlistResponse(data);
       return normalized;
     } catch (err) {

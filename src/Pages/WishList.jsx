@@ -63,7 +63,6 @@ export default function WishList() {
         await dispatch(removeWishlistItem(productId)).unwrap();
         toast.success("Removed from wishlist");
       } catch (err) {
-        console.error("Failed to remove wishlist item:", err);
         toast.error("Failed to remove from wishlist");
       }
     },

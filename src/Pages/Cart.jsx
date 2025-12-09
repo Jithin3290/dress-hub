@@ -235,6 +235,9 @@ function Cart() {
           const lockId = it.cartItemId ?? it.productId;
           const updating = updatingIds.has(String(lockId));
 
+          // item subtotal
+          const itemSubtotal = Number(it.unit_price ?? 0) * Number(it.quantity ?? 0);
+
           return (
             <div
               key={`${it.productId}-${it.cartItemId ?? "fallback"}`}
@@ -248,7 +251,11 @@ function Cart() {
                 />
                 <div>
                   <h3 className="font-semibold">{product.name}</h3>
-                  <p className="text-gray-500">₹{it.unit_price}</p>
+                  <p className="text-gray-500">₹{Number(it.unit_price).toFixed(2)}</p>
+
+                  {/* NEW: per-item subtotal */}
+                  <p className="text-sm font-medium">Subtotal: ₹{itemSubtotal.toFixed(2)}</p>
+
                   <p className="text-sm">Quantity: {it.quantity}</p>
                   <p className="text-sm">Size: {it.size}</p>
 
@@ -319,7 +326,7 @@ function Cart() {
       </div>
 
       <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <p className="text-lg font-semibold">Total: ₹{totalPrice}</p>
+        <p className="text-lg font-semibold">Total: ₹{Number(totalPrice).toFixed(2)}</p>
         <button
           onClick={handleBuyAll}
           className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg"

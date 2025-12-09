@@ -140,7 +140,7 @@ const ordersSlice = createSlice({
       state.error = null;
     },
     setCheckoutItems(state, action) {
-      state.checkoutItems = action.payload;
+      state.checkoutItems = Array.isArray(action.payload) ? action.payload : [];
     },
     clearCheckoutItems(state) {
       state.checkoutItems = null;

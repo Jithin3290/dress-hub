@@ -60,7 +60,7 @@ function RecentlyWatched() {
 
             <div
               className="relative overflow-hidden bg-gray-100"
-              onClick={() => navigate(`/product/${item.id}`)}
+              onClick={() => navigate(`/mens`)}
             >
               <img
                 src={item.image}

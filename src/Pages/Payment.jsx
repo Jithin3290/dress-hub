@@ -171,7 +171,6 @@ export default function PaymentPage() {
 
   useEffect(() => {
     if (!ordersPayload || ordersPayload.length === 0) {
-      toast.error("Nothing to pay for.");
       navigate(-1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -179,7 +178,7 @@ export default function PaymentPage() {
 
   const hasPriceProblem = lineItems.some((l) => l.priceMissing);
   const payDisabled = processing || checkoutLoading || hasPriceProblem || Number(totalPrice) <= 0;
-
+  
   const handleRemoveItem = async (productId) => {
     try {
       const ci = Array.isArray(cartItems)
