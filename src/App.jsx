@@ -76,7 +76,6 @@ function AppWrapper() {
           <Route path="/payment" element={<ProtectedRouter><Payment /></ProtectedRouter>} />
           <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
           <Route path="*" element={<Notfound />} />
-          <Route path='/admin' element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
 
         </Routes>
       </Suspense>

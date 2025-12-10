@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import useProtectedLoginRedirect from '../Components/ProtectedRoutes/useProtectedLoginRedirect';
 import { signupUser } from "../Redux/Slices/authSlice.jsx"; 
+import useProtectedLoginRedirect from '../Components/ProtectedRoutes/useProtectedLoginRedirect.jsx';
 
 function Signup() {
-  useProtectedLoginRedirect();
+  useProtectedLoginRedirect
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.auth);

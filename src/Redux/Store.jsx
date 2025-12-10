@@ -5,14 +5,20 @@ import wishlistReducer from "./Slices/wishlistSlice";
 import cartReducer from "./Slices/cartSlice"
 import recentlyWatchedReducer, { STORAGE_KEY } from "./Slices/recentlywatchedSlice";
 import ordersReducer from "./Slices/orderSlice"
+import adminReducer from "./Slices/adminSlice";
+import adminOrdersReducer from "./Slices/adminOrdersSlice";
+import adminProductsReducer from "./Slices/adminProductsSlice";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    admin: adminReducer,
     products:productsReducer,
     wishlist:wishlistReducer,
     cart: cartReducer,
     recentlyWatched: recentlyWatchedReducer,
     orders : ordersReducer,
+    adminOrders: adminOrdersReducer,
+    adminProducts: adminProductsReducer,
   },
 });
 

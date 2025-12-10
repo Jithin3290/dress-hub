@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import useProtectedLoginRedirect from '../Components/ProtectedRoutes/useProtectedLoginRedirect';
 import { loginUser } from '../Redux/Slices/authSlice';
-
+import useProtectedLoginRedirect from '../Components/ProtectedRoutes/useProtectedLoginRedirect';
 function Login() {
-  useProtectedLoginRedirect();
+  useProtectedLoginRedirect
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.auth || {});
@@ -41,11 +40,11 @@ function Login() {
 
     try {
       const result = await dispatch(loginUser({ email, password })).unwrap();
-
+      
       // preserve your behavior: redirect and admin check
-      if (result.user?.is_staff || result.user?.is_superuser || result.isAdmin) {
+      if (result.user.is_staff || result.user.is_superuser) {
         setTimeout(() => {
-          window.location.href = '/admin';
+            navigate("/admin", { replace: true });
         }, 100);
       } else {
         setTimeout(() => navigate('/'), 500);
