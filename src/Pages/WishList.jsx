@@ -60,8 +60,8 @@ export default function WishList() {
   const removeFromWishlist = useCallback(
     async (productId) => {
       try {
+
         await dispatch(removeWishlistItem(productId)).unwrap();
-        toast.success("Removed from wishlist");
       } catch (err) {
         toast.error("Failed to remove from wishlist");
       }

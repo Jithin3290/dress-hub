@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../Redux/Slices/authSlice';
 import useProtectedLoginRedirect from '../Components/ProtectedRoutes/useProtectedLoginRedirect';
 function Login() {
-  useProtectedLoginRedirect
+  useProtectedLoginRedirect();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.auth || {});
@@ -46,7 +46,12 @@ function Login() {
         setTimeout(() => {
             navigate("/admin", { replace: true });
         }, 100);
-      } else {
+      }
+      else if (result.user.is_banned) {
+        newErrors.non_field = 'Your account has been banned';
+        setErrors(newErrors);
+      }
+       else {
         setTimeout(() => navigate('/'), 500);
       }
     } catch (err) {

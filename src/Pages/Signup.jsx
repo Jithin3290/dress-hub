@@ -5,7 +5,7 @@ import { signupUser } from "../Redux/Slices/authSlice.jsx";
 import useProtectedLoginRedirect from '../Components/ProtectedRoutes/useProtectedLoginRedirect.jsx';
 
 function Signup() {
-  useProtectedLoginRedirect
+  useProtectedLoginRedirect();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.auth);

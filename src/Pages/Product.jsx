@@ -7,9 +7,12 @@ import Footer from "../Components/Footer/Footer";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { fetchProduct } from "../Redux/Slices/productsSlice";
 import { addCartItem, fetchCart } from "../Redux/Slices/cartSlice";
-import { setCheckoutItems } from "../Redux/Slices/orderSlice"; 
+import { setCheckoutItems } from "../Redux/Slices/orderSlice";
 import { addRecentlyWatched } from "../Redux/Slices/recentlywatchedSlice";
 
+/* -----------------------
+   Helpers
+   ----------------------- */
 function safeCategoryName(cat) {
   if (!cat) return "Fashion";
   if (typeof cat === "string") return cat;
@@ -17,6 +20,22 @@ function safeCategoryName(cat) {
   return "Fashion";
 }
 
+const formatCurrency = (val) => {
+  if (val === null || val === undefined || Number.isNaN(Number(val))) return "0.00";
+  const n = typeof val === "number" ? val : parseFloat(String(val));
+  return n.toFixed(2);
+};
+
+const resolveImageUrl = (imgPath) => {
+  if (!imgPath) return "";
+  if (imgPath.startsWith("http://") || imgPath.startsWith("https://")) return imgPath;
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  return `${API_BASE.replace(/\/$/, "")}${imgPath}`;
+};
+
+/* -----------------------
+   Component
+   ----------------------- */
 function Product() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -29,8 +48,7 @@ function Product() {
   const user = useSelector((s) => s.auth?.user);
 
   const productFromList = products.find((p) => String(p.id) === String(id));
-  const product =
-    selected && String(selected.id) === String(id) ? selected : productFromList;
+  const product = selected && String(selected.id) === String(id) ? selected : productFromList;
 
   const [selectedSize, setSelectedSize] = useState("");
   const [qty, setQty] = useState(1);
@@ -44,6 +62,27 @@ function Product() {
       dispatch(fetchProduct({ id })).catch(() => {});
     }
   }, [dispatch, id, productFromList, selected]);
+
+  // Re-fetch product when tab becomes visible or on history navigation (back/forward)
+  useEffect(() => {
+    const refetchIfVisible = () => {
+      if (document.visibilityState === "visible") {
+        dispatch(fetchProduct({ id })).catch(() => {});
+      }
+    };
+
+    const onPopState = () => {
+      dispatch(fetchProduct({ id })).catch(() => {});
+    };
+
+    document.addEventListener("visibilitychange", refetchIfVisible);
+    window.addEventListener("popstate", onPopState);
+
+    return () => {
+      document.removeEventListener("visibilitychange", refetchIfVisible);
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [dispatch, id]);
 
   // Recently watched + server
   useEffect(() => {
@@ -75,8 +114,7 @@ function Product() {
 
   const categoryName = safeCategoryName(product.category);
   const img = product.image || product.image_url || "";
-  const newPrice =
-    product.new_price ?? product.newPrice ?? product.price ?? 0;
+  const newPrice = product.new_price ?? product.newPrice ?? product.price ?? 0;
   const oldPrice = product.old_price ?? product.oldPrice ?? 0;
 
   // Determine cart items array safely
@@ -99,7 +137,8 @@ function Product() {
   // final decision: if we optimistically just added, show Go to Cart immediately
   const isInCart = isInCartFromStore || addedToCart;
 
-  // Helper: get stock for product or size (same logic used in Cart)
+
+  
   const getStockForProduct = (productObj, size = null) => {
     if (!productObj) return null;
 
@@ -124,25 +163,29 @@ function Product() {
 
   const selectedStock = getStockForProduct(product, selectedSize);
 
+  
   // caps
   const MAX_ALLOWED_QTY = 5;
-  const effectiveMax = selectedStock !== null && selectedStock !== undefined ? Math.min(MAX_ALLOWED_QTY, selectedStock) : MAX_ALLOWED_QTY;
 
-  const lowStock = selectedStock !== null && selectedStock !== undefined && selectedStock > 0 && selectedStock < 5;
-  const outOfStock = selectedStock !== null && selectedStock === 0;
+  const outOfStock = selectedStock == null
 
-  // ADD TO CART
+  /* -----------------------
+     Actions
+     ----------------------- */
   const handleAddToCart = async () => {
+      // check stock before sending
+    if (selectedStock !== null && selectedStock !== undefined && qty > selectedStock) {
+      toast.error(`Only ${selectedStock} left in stock`);
+      return;
+    }
+
+
     if (product.sizes?.length > 0 && !selectedSize) {
       toast.error("Please select a size");
       return;
     }
 
-    // check stock before sending
-    if (selectedStock !== null && selectedStock !== undefined && qty > selectedStock) {
-      toast.error(`Only ${selectedStock} left in stock`);
-      return;
-    }
+  
 
     if (qty < 1 || qty > MAX_ALLOWED_QTY) {
       toast.error(`Quantity must be between 1 and ${MAX_ALLOWED_QTY}`);
@@ -169,12 +212,10 @@ function Product() {
       toast.success("Added to cart");
     } catch (err) {
       console.error("Add to cart failed:", err);
-      // if your backend wants login, it might throw; keep original behavior
       navigate("/login");
     }
   };
 
-  // BUY NOW (single-product checkout)
   const handleBuyNow = () => {
     if (!product) {
       toast.error("Product not available");
@@ -225,7 +266,7 @@ function Product() {
       shipping_address: "",
       phone: "",
     };
-    
+
     try {
       dispatch(setCheckoutItems([singleItem]));
       try {
@@ -244,6 +285,9 @@ function Product() {
     }
   };
 
+  /* -----------------------
+     Markup
+     ----------------------- */
   return (
     <>
       <div className="max-w-5xl mx-auto p-6 mt-4">
@@ -251,7 +295,7 @@ function Product() {
 
         <div className="grid md:grid-cols-2 gap-10 bg-white p-6 rounded-lg shadow-lg">
           <img
-            src={img}
+            src={resolveImageUrl(img)}
             alt={product.name}
             className="w-full h-auto rounded-lg shadow-md object-cover"
             onError={(e) => {
@@ -264,12 +308,12 @@ function Product() {
               <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
               <p className="text-gray-500 mb-1 capitalize">{categoryName}</p>
 
-              {oldPrice > newPrice && (
-                <p className="line-through text-gray-400">₹{oldPrice}</p>
+              {Number(oldPrice) > Number(newPrice) && (
+                <p className="line-through text-gray-400">₹{formatCurrency(oldPrice)}</p>
               )}
 
               <p className="text-2xl text-green-600 font-bold mb-4">
-                ₹{newPrice}
+                ₹{formatCurrency(newPrice)}
               </p>
 
               <p className="text-gray-700 mb-6 leading-relaxed">
@@ -280,9 +324,7 @@ function Product() {
 
               {Array.isArray(product.sizes) && product.sizes.length > 0 && (
                 <div className="mb-4">
-                  <div className="text-sm font-semibold mb-2">
-                    Choose size
-                  </div>
+                  <div className="text-sm font-semibold mb-2">Choose size</div>
                   <div className="flex gap-2 flex-wrap">
                     {product.sizes.map((s) => {
                       const out = Number(s.stock) <= 0;
@@ -293,14 +335,7 @@ function Product() {
                           key={s.size}
                           onClick={() => !out && setSelectedSize(s.size)}
                           disabled={out}
-                          className={`px-3 py-2 rounded-full border ${
-                            selected
-                              ? "border-amber-500 bg-amber-50"
-                              : "border-gray-200"
-                          } ${out
-                            ? "opacity-50 cursor-not-allowed"
-                            : "cursor-pointer"
-                          }`}
+                          className={`px-3 py-2 rounded-full border ${selected ? "border-amber-500 bg-amber-50" : "border-gray-200"} ${out ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                         >
                           {s.size} {out ? "(OOS)" : ""}
                         </button>
@@ -321,6 +356,7 @@ function Product() {
                       )}
                     </>
                   ) : (
+                    
                     <p className="text-red-500 text-sm">Out of stock</p>
                   )}
                 </div>
@@ -333,7 +369,7 @@ function Product() {
                 <button
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
                   className="px-2 py-1 rounded bg-gray-200"
-                  disabled={qty <= 1}
+                  disabled={qty <= 1 || outOfStock}
                 >
                   <FaMinus />
                 </button>
@@ -347,41 +383,49 @@ function Product() {
                     if (qty >= cap) {
                       if (available !== null && available !== undefined) {
                         toast.error("Maximum quantity reached");
-                      } 
+                      }
                       return;
                     }
                     setQty((q) => Math.min(5, q + 1));
                   }}
                   className="px-2 py-1 rounded bg-gray-200"
+                  disabled={outOfStock}
                 >
                   <FaPlus />
                 </button>
               </div>
 
-              {isInCart ? (
-                <button
-                  onClick={() => navigate("/cart")}
-                  className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
-                >
-                  Go to Cart
-                </button>
+              {/* If out of stock -> show message, else show buttons */}
+              {outOfStock ? (
+                <div className="text-red-600 font-semibold">Out of stock</div>
               ) : (
-                <button
-                  onClick={handleAddToCart}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  disabled={outOfStock}
-                >
-                  Add to Cart
-                </button>
-              )}
+                <>
+                  {isInCart ? (
+                    <button
+                      onClick={() => navigate("/cart")}
+                      className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
+                    >
+                      Go to Cart
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleAddToCart}
+                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                      disabled={outOfStock}
+                    >
+                      Add to Cart
+                    </button>
+                  )}
 
-              <button
-                onClick={handleBuyNow}
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                disabled={outOfStock}
-              >
-                Buy Now
-              </button>
+                  <button
+                    onClick={handleBuyNow}
+                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    disabled={outOfStock}
+                  >
+                    Buy Now
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

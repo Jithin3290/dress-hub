@@ -20,6 +20,7 @@ export default function ManageProducts() {
   const [categories, setCategories] = useState([]);
   const [sizesList, setSizesList] = useState([]); // existing sizes from backend (optional)
   const [imageFile, setImageFile] = useState(null);
+  const [showForm, setShowForm] = useState(false); // New state for form visibility
 
   const [form, setForm] = useState({
     name: "",
@@ -106,6 +107,7 @@ export default function ManageProducts() {
           success: () => {
             setForm({ name: "", category_id: "", new_price: "", old_price: "", sizes_input: [], stock: "" });
             setImageFile(null);
+            setShowForm(false); // Hide form after successful creation
             dispatch(fetchAdminProducts({ page: 1, pageSize, search }));
             return "Created";
           },
@@ -143,6 +145,7 @@ export default function ManageProducts() {
       <Toaster />
       <h2 className="text-2xl font-semibold mb-4">Manage Products</h2>
 
+      {/* Search and pagination controls */}
       <form onSubmit={(e)=>{ e.preventDefault(); dispatch(setSearch(e.target.search.value.trim())); }} className="flex gap-2 mb-4">
         <input name="search" defaultValue={search} placeholder="Search..." className="border p-2 rounded w-full" />
         <button className="bg-blue-600 text-white px-4 py-2 rounded">Search</button>
@@ -153,40 +156,55 @@ export default function ManageProducts() {
         </select>
       </form>
 
-      <form onSubmit={submitForm} className="bg-gray-50 p-4 rounded shadow mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <input value={form.name} onChange={(e)=>handleForm("name", e.target.value)} placeholder="Name" className="border p-2 rounded" />
-          <select value={form.category_id} onChange={(e)=>handleForm("category_id", e.target.value)} className="border p-2 rounded">
-            <option value="">Category</option>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-          <input type="number" value={form.new_price} onChange={(e)=>handleForm("new_price", e.target.value)} placeholder="New price" className="border p-2 rounded" />
-          <input type="number" value={form.old_price} onChange={(e)=>handleForm("old_price", e.target.value)} placeholder="Old price (optional)" className="border p-2 rounded" />
-          <input type="number" value={form.stock} onChange={(e)=>handleForm("stock", e.target.value)} placeholder="Stock (applies to sizes)" className="border p-2 rounded" />
-          <input type="file" accept="image/*" onChange={onFileChange} className="border p-2 rounded" />
-        </div>
+      {/* Show/Hide form button */}
+      <div className="mb-6">
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="mb-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition-colors"
+        >
+          {showForm ? "Hide Product Form" : "Add New Product"}
+        </button>
 
-        <div className="mt-4">
-          <label className="block mb-2 font-semibold">Sizes (type and press Enter)</label>
-          <div className="flex gap-2 mb-2">
-            <input value={sizeInputText} onChange={(e)=>setSizeInputText(e.target.value)} onKeyDown={(e)=>{ if(e.key==="Enter"){ e.preventDefault(); addSizeTag(); }}} placeholder="e.g. S or XL or 28" className="border p-2 rounded flex-1" />
-            <button type="button" onClick={addSizeTag} className="px-3 py-1 bg-blue-600 text-white rounded">Add</button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {form.sizes_input.map((t,i) => (
-              <div key={t} className="inline-flex items-center gap-2 bg-gray-100 px-2 py-1 rounded">
-                <span>{t}</span>
-                <button type="button" onClick={() => removeSizeTag(i)} className="text-red-500">x</button>
+        {/* Product form - conditionally rendered */}
+        {showForm && (
+          <form onSubmit={submitForm} className="bg-gray-50 p-4 rounded shadow mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <input value={form.name} onChange={(e)=>handleForm("name", e.target.value)} placeholder="Name" className="border p-2 rounded" required />
+              <select value={form.category_id} onChange={(e)=>handleForm("category_id", e.target.value)} className="border p-2 rounded" required>
+                <option value="">Category</option>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              <input type="number" value={form.new_price} onChange={(e)=>handleForm("new_price", e.target.value)} placeholder="New price" className="border p-2 rounded" required />
+              <input type="number" value={form.old_price} onChange={(e)=>handleForm("old_price", e.target.value)} placeholder="Old price (optional)" className="border p-2 rounded" />
+              <input type="number" value={form.stock} onChange={(e)=>handleForm("stock", e.target.value)} placeholder="Stock (applies to sizes)" className="border p-2 rounded" required />
+              <input type="file" accept="image/*" onChange={onFileChange} className="border p-2 rounded" />
+            </div>
+
+            <div className="mt-4">
+              <label className="block mb-2 font-semibold">Sizes (type and press Enter)</label>
+              <div className="flex gap-2 mb-2">
+                <input value={sizeInputText} onChange={(e)=>setSizeInputText(e.target.value)} onKeyDown={(e)=>{ if(e.key==="Enter"){ e.preventDefault(); addSizeTag(); }}} placeholder="e.g. S or XL or 28" className="border p-2 rounded flex-1" />
+                <button type="button" onClick={addSizeTag} className="px-3 py-1 bg-blue-600 text-white rounded">Add</button>
               </div>
-            ))}
-          </div>
-        </div>
+              <div className="flex flex-wrap gap-2">
+                {form.sizes_input.map((t,i) => (
+                  <div key={t} className="inline-flex items-center gap-2 bg-gray-100 px-2 py-1 rounded">
+                    <span>{t}</span>
+                    <button type="button" onClick={() => removeSizeTag(i)} className="text-red-500">x</button>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-        <div className="mt-4">
-          <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">Create Product</button>
-        </div>
-      </form>
+            <div className="mt-4 flex gap-3">
+              <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Create Product</button>
+              <button type="button" onClick={() => setShowForm(false)} className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
+            </div>
+          </form>
+        )}
+      </div>
 
+      {/* Products list */}
       {loading ? <div>Loading...</div> : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {products.map(p => (
@@ -223,6 +241,7 @@ export default function ManageProducts() {
         </div>
       )}
 
+      {/* Pagination */}
       <div className="mt-6 flex justify-between items-center">
         <div>Page {page} of {totalPages}</div>
         <div className="flex gap-2">

@@ -176,7 +176,6 @@ export default function ManageOrders() {
                         <option value="PROCESSING" className="text-yellow-600">PROCESSING</option>
                         <option value="SHIPPED" className="text-blue-600">SHIPPED</option>
                         <option value="DELIVERED" className="text-green-600">DELIVERED</option>
-                        <option value="CANCELLED" className="text-red-600">CANCELLED</option>
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

@@ -2,16 +2,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserOrders } from "../../Redux/Slices/orderSlice";
-import api from "../../user_api";
 
-// currency helper: accepts number | string | Decimal-like
+// helpers
 const formatCurrency = (val) => {
   if (val === null || val === undefined || Number.isNaN(Number(val))) return "0.00";
   const n = typeof val === "number" ? val : parseFloat(String(val));
   return n.toFixed(2);
 };
 
-// resolve image path to absolute URL using VITE_API_URL or default backend
 const resolveImageUrl = (imgPath) => {
   if (!imgPath) return "";
   if (imgPath.startsWith("http://") || imgPath.startsWith("https://")) return imgPath;
@@ -20,7 +18,6 @@ const resolveImageUrl = (imgPath) => {
 };
 
 function OrderItemRow({ item }) {
-  // defensive: item.price may be string/number/Decimal
   const unitPrice = Number(item.price || 0);
   const qty = Number(item.quantity || 0);
   const lineTotal = unitPrice * qty;
@@ -42,7 +39,6 @@ function OrderItemRow({ item }) {
         <div className="text-sm text-gray-500">Size: {item.size || "-"}</div>
         <div className="text-sm text-gray-500">Qty: {qty}</div>
 
-        {/* small meta row: unit price and line total */}
         <div className="mt-1 text-sm flex items-center gap-3 text-gray-600">
           <div>Unit: ₹{formatCurrency(unitPrice)}</div>
           <div className="font-semibold">Line: ₹{formatCurrency(lineTotal)}</div>
@@ -58,20 +54,16 @@ function OrderItemRow({ item }) {
 }
 
 function OrderSummary({ order }) {
-  // compute subtotal from items (defensive)
   const subtotal = (order.items || []).reduce((acc, it) => {
     const p = Number(it.price || 0);
     const q = Number(it.quantity || 0);
     return acc + p * q;
   }, 0);
 
-  // shipping/tax placeholders; adapt if your API provides these fields
   const shipping = Number(order.shipping_cost || 0);
   const tax = Number(order.tax_amount || 0);
-
   const computedTotal = subtotal + shipping + tax;
   const serverTotal = Number(order.total_amount || 0);
-
   const mismatch = Math.abs(computedTotal - serverTotal) > 0.01;
 
   return (
@@ -103,7 +95,7 @@ function OrderSummary({ order }) {
 
       {mismatch && (
         <div className="mt-2 text-xs text-red-600">
-          Notice: server total differs from calculated subtotal. This can happen if discounts, shipping or taxes are applied on the server. If unexpected, verify server-side calculation.
+          Notice: server total differs from calculated subtotal. This can happen if discounts, shipping or taxes are applied on the server.
         </div>
       )}
     </div>
@@ -116,18 +108,13 @@ export default function OrderPage() {
   const loading = useSelector((s) => (s.orders ? s.orders.loading : false));
   const error = useSelector((s) => (s.orders ? s.orders.error : null));
 
-  // local copy so we can optimistically update UI without re-fetching Redux
   const [orders, setOrders] = useState([]);
-  // expanded set to avoid per-card hooks inside map
   const [expandedSet, setExpandedSet] = useState(new Set());
-  // cancelling map { [orderId]: boolean }
-  const [cancelling, setCancelling] = useState({});
 
   useEffect(() => {
     dispatch(fetchUserOrders());
   }, [dispatch]);
 
-  // keep local copy in sync when redux updates
   useEffect(() => {
     if (Array.isArray(reduxOrders)) setOrders(reduxOrders);
   }, [reduxOrders]);
@@ -139,39 +126,6 @@ export default function OrderPage() {
       else copy.add(id);
       return copy;
     });
-  };
-
-  const cancelOrder = async (orderId) => {
-    if (!window.confirm("Cancel this order?")) return;
-
-    const prevOrders = orders;
-    setOrders((o) => o.filter((x) => x.id !== orderId));
-    setCancelling((s) => ({ ...s, [orderId]: true }));
-
-    try {
-      const url = `/order/${orderId}/cancel/`;
-      const res = await api.patch(url, {}, { headers: { Accept: "application/json" } });
-
-      if (res.status >= 200 && res.status < 300) {
-        setCancelling((s) => {
-          const copy = { ...s };
-          delete copy[orderId];
-          return copy;
-        });
-        return;
-      }
-
-      throw new Error(`Unexpected status ${res.status}`);
-    } catch (err) {
-      setOrders(prevOrders);
-      setCancelling((s) => {
-        const copy = { ...s };
-        delete copy[orderId];
-        return copy;
-      });
-      console.error("Cancel failed", err);
-      alert("Failed to cancel order: " + (err?.response?.data?.detail || err.message || err));
-    }
   };
 
   const isEmpty = useMemo(() => !orders || orders.length === 0, [orders]);
@@ -203,7 +157,6 @@ export default function OrderPage() {
         {orders?.map((order) => {
           const createdAtString = order?.created_at ? new Date(order.created_at).toLocaleString() : "-";
           const isOpen = expandedSet.has(order.id);
-          const isCancelling = !!cancelling[order.id];
 
           return (
             <section key={order.id} className="border rounded-lg p-4 bg-white shadow-sm">
@@ -229,16 +182,6 @@ export default function OrderPage() {
                 <button onClick={() => toggleExpanded(order.id)} className="px-3 py-1 rounded border text-sm hover:bg-gray-50">
                   {isOpen ? "Hide details" : "View details"}
                 </button>
-
-                {order.order_status && !["SHIPPED", "DELIVERED", "CANCELLED"].includes(order.order_status) && (
-                  <button
-                    onClick={() => cancelOrder(order.id)}
-                    disabled={isCancelling}
-                    className="px-3 py-1 rounded border text-sm text-red-600 hover:bg-red-50 disabled:opacity-60"
-                  >
-                    {isCancelling ? "Cancelling..." : "Cancel Order"}
-                  </button>
-                )}
 
                 {order.tracking_id && (
                   <a className="px-3 py-1 rounded border text-sm hover:bg-gray-50" href="#">
@@ -269,7 +212,6 @@ export default function OrderPage() {
                       </div>
                     </div>
 
-                    {/* Order summary component */}
                     <OrderSummary order={order} />
                   </div>
                 </div>
