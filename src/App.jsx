@@ -55,7 +55,9 @@ function AppWrapper() {
 
   return (
     <>
+ 
       {!shouldHideNavbar && <Navbar />}
+      
       <ScrollToTop />
       <Suspense fallback={<div className="text-center py-8">Loading...</div>}>
         <Routes>

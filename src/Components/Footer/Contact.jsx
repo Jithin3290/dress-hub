@@ -7,12 +7,27 @@ function Contact() {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert('Thanks for contacting us!');
-    nav("/")
-    setForm({ name: '', email: '', message: '' });
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const res = await fetch("http://localhost:8000/api/v1/user/contact/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    if (!res.ok) throw new Error("Failed to send");
+
+    alert("Message sent");
+    nav("/");
+    setForm({ name: "", email: "", message: "" });
+  } catch (err) {
+    console.log(err);
+    alert("Something went wrong");
+  }
+};
+
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12 text-gray-800">

@@ -37,22 +37,40 @@ export const signupUser = createAsyncThunk(
   "auth/signupUser",
   async (payload, { rejectWithValue }) => {
     try {
-      const formData = new FormData();
-      Object.entries(payload).forEach(([k, v]) => {
-        if (v !== undefined && v !== null) formData.append(k, v);
-      });
+      // If caller already passed a FormData, send it unchanged
+      let body;
+      if (payload instanceof FormData) {
+        body = payload;
+      } else {
+        // build a FormData from a plain object
+        const fd = new FormData();
+        Object.entries(payload || {}).forEach(([k, v]) => {
+          if (v === undefined || v === null) return;
+          // if v is array or object, stringify (except File)
+          if (v instanceof File) {
+            fd.append(k, v);
+          } else if (typeof v === "object" && !(v instanceof File)) {
+            try {
+              fd.append(k, JSON.stringify(v));
+            } catch {
+              fd.append(k, String(v));
+            }
+          } else {
+            fd.append(k, String(v));
+          }
+        });
+        body = fd;
+      }
 
-      const res = await api.post("user/signup/", formData);
-      // If backend returns user on signup and you want to auto-login, normalize and persist here.
-      // const user = normalizeUser(res.data.user ?? res.data);
-      // sessionStorage.setItem("user", JSON.stringify(user));
-      // return user;
+      // DO NOT set Content-Type header here when body is FormData.
+      const res = await api.post("user/signup/", body);
       return res.data;
     } catch (err) {
       return rejectWithValue(getAxiosError(err));
     }
   }
 );
+
 
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
@@ -175,6 +193,22 @@ export const updateProfile = createAsyncThunk(
     }
   }
 );
+// in authSlice.js (near other thunks)
+export const requestSignupOtp = createAsyncThunk(
+  "auth/requestSignupOtp",
+  async ({ email }, { rejectWithValue }) => {
+    try {
+      // POST /user/send-signup-otp/ { email }
+      const res = await api.post("user/send-signup-otp/", { email });
+      // backend returns { detail: "sent" } or similar
+      return res.data;
+    } catch (err) {
+      if (err?.response?.data) return rejectWithValue(err.response.data);
+      return rejectWithValue({ detail: err.message || "Failed to send OTP" });
+    }
+  }
+);
+
 
 /**
  * Slice
