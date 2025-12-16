@@ -20,6 +20,10 @@ import ProtectedAdminRoute from "./Components/ProtectedRoutes/ProtectedAdminRout
 import Payment from "./Pages/Payment";
 import Notfound from "./Pages/Notfound";
 import AdminDashboard from './Pages/Admin/AdminDashboard';
+import Notification from "./Components/Notification";
+import { Toaster } from "react-hot-toast";
+
+
 
 // redux
 import { store } from "./Redux/Store"; // adjust if your store file path differs
@@ -59,6 +63,7 @@ function AppWrapper() {
       {!shouldHideNavbar && <Navbar />}
       
       <ScrollToTop />
+      <Notification />
       <Suspense fallback={<div className="text-center py-8">Loading...</div>}>
         <Routes>
           <Route path="/signup" element={<Signup />} />
