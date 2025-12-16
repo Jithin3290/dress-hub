@@ -124,8 +124,9 @@ export default function ManageProducts() {
 
   async function savePrice(id) {
     try {
-      await toast.promise(dispatch(patchAdminProduct({ id, patch: { new_price: editPrice.new_price, old_price: editPrice.old_price } })).unwrap(), {
-        loading: "Saving...", success: "Saved", error: "Failed",
+      if(editPrice.new_price>0 && editPrice.old_price>0)
+        await toast.promise(dispatch(patchAdminProduct({ id, patch: { new_price: editPrice.new_price, old_price: editPrice.old_price } })).unwrap(), {
+          loading: "Saving...", success: "Saved", error: "Failed",
       });
       setEditId(null);
     } catch {}
