@@ -1,9 +1,14 @@
-// src/admin_api.js
 import axios from "axios";
 
+const API_BASE = import.meta.env.VITE_API_URL;
+
+if (!API_BASE) {
+  throw new Error("VITE_API_URL is not defined");
+}
+
 const adminApi = axios.create({
-  baseURL: import.meta.env.VITE_API_URL?.replace(/\/$/, "") + "/api/v1/admin/" || "http://localhost:8000/api/admin/",
-  withCredentials: true, // if using session cookies
+  baseURL: API_BASE.replace(/\/$/, "") + "/api/v1/admin/",
+  withCredentials: true,
   headers: {
     Accept: "application/json",
   },

@@ -9,44 +9,53 @@ function NewCollections() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let mounted = true;
-    const url =
-      "http://localhost:8000/api/v1/products/?page_size=8&ordering=-created_at&category__slug=men";
+useEffect(() => {
+  let mounted = true;
 
-    async function load() {
-      if (!mounted) return;
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(url);
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(`Request failed ${res.status}: ${text}`);
-        }
-        const data = await res.json();
+  const API_BASE = import.meta.env.VITE_API_URL;
+  if (!API_BASE) {
+    throw new Error("VITE_API_URL is not defined");
+  }
 
-        const items = Array.isArray(data)
-          ? data
-          : Array.isArray(data.results)
-          ? data.results
-          : [];
+  const url =
+    API_BASE.replace(/\/$/, "") +
+    "/api/v1/products/?page_size=8&ordering=-created_at&category__slug=men";
 
-        if (mounted) setProducts(items.slice(0, 8));
-      } catch (err) {
-        // No AbortController here, so just report real errors
-        console.error("Failed to load new collections:", err);
-        if (mounted) setError(err.message || "Failed to load products");
-      } finally {
-        if (mounted) setLoading(false);
+  async function load() {
+    if (!mounted) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(url, {
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Request failed ${res.status}: ${text}`);
       }
-    }
+      const data = await res.json();
 
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+      const items = Array.isArray(data)
+        ? data
+        : Array.isArray(data.results)
+        ? data.results
+        : [];
+
+      if (mounted) setProducts(items.slice(0, 8));
+    } catch (err) {
+      console.error("Failed to load new collections:", err);
+      if (mounted) setError(err.message || "Failed to load products");
+    } finally {
+      if (mounted) setLoading(false);
+    }
+  }
+
+  load();
+  return () => {
+    mounted = false;
+  };
+}, []);
+
 
   if (loading) {
     return (
