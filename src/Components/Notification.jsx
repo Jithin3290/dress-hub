@@ -7,7 +7,12 @@ function Notification() {
   useEffect(() => {
     if (wsRef.current) return;
 
-    const ws = new WebSocket("ws://localhost:8000/ws/order/notifications/");
+    const WS_BASE = import.meta.env.VITE_WS_URL;
+    if (!WS_BASE) {
+      throw new Error("VITE_WS_URL is not defined");
+    }
+
+    const ws = new WebSocket(`${WS_BASE}/ws/order/notifications/`);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -26,7 +31,9 @@ function Notification() {
       }
     };
 
-
+    ws.onerror = (err) => {
+      console.error("❌ WS ERROR", err);
+    };
 
     return () => {
       ws.close();
