@@ -88,7 +88,7 @@ export default function WishList() {
                 <FaHeart size={20} />
               </button>
 
-              <img src={product.image ?? "/placeholder.png"} alt={product.name ?? `Product ${product.id}`} className="w-full h-48 object-contain mb-2" />
+              <img src={product.image_url ?? "/placeholder.png"} alt={product.name ?? `Product ${product.id}`} className="w-full h-48 object-contain mb-2" />
               <h2 className="text-lg font-medium">{product.name ?? `Product ${product.id}`}</h2>
               <p className="text-gray-700">₹{product.new_price ?? product.price ?? "—"}</p>
 

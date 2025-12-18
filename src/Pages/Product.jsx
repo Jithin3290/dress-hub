@@ -91,7 +91,7 @@ function Product() {
     const mini = {
       id: product.id,
       name: product.name,
-      image: product.image ?? "",
+      image: product.image_url ?? "",
       new_price: product.new_price ?? product.price ?? 0,
       old_price: product.old_price ?? 0,
       category: safeCategoryName(product.category),
