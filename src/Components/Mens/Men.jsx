@@ -168,7 +168,7 @@ function Men() {
                 <Link to={`/product/${id}`}>
                   <div className="relative overflow-hidden bg-gray-100">
                     <img
-                      src={product.image_url ?? "/placeholder.png"}
+                      src={product.image ?? "/placeholder.png"}
                       alt={product.name ?? "Product image"}
                       className="w-full h-112 object-cover transition-transform duration-700 group-hover:scale-110"
                     />

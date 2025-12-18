@@ -55,7 +55,7 @@ const ProductCard = React.memo(({ product, isWished, toggleWishlist, style }) =>
       <div className="relative overflow-hidden bg-gray-100">
         {/* changed h-80 to h-112 to match Men/Women pages */}
         <img 
-          src={product.image_url ?? "/placeholder.png"} 
+          src={product.image ?? "/placeholder.png"} 
           alt={product.name ?? "Product image"} 
           className="w-full h-112 object-cover transition-transform duration-700 group-hover:scale-110" 
         />
