@@ -33,7 +33,6 @@ import { fetchProfile } from "./Redux/Slices/authSlice"; // adjust path if neede
 const About = lazy(() => import("./Components/Footer/About"));
 const Careers = lazy(() => import("./Components/Footer/Careers"));
 const Contact = lazy(() => import("./Components/Footer/Contact"));
-console.log("VITE_API_URL =", import.meta.env.VITE_API_URL);
 
 // App-level bootstrap component that hydrates auth on start
 
