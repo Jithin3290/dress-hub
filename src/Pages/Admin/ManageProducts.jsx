@@ -44,6 +44,10 @@ export default function ManageProducts() {
     dispatch(fetchAdminProducts({ page, pageSize, search }));
   }, [dispatch, page, pageSize, search]);
 
+  console.log("Products:", products);
+  console.log("Loading:", loading);
+  console.log("Error:", error);
+
   useEffect(() => {
     if (error) toast.error(typeof error === "string" ? error : (error?.detail || "Something went wrong"));
   }, [error]);
