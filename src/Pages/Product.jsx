@@ -174,6 +174,10 @@ function Product() {
      ----------------------- */
   const handleAddToCart = async () => {
       // check stock before sending
+    if (!user) {
+      navigate("/login", { state: { from: `/product/${product.id}` } });
+      return;
+    }
     if (selectedStock !== null && selectedStock !== undefined && qty > selectedStock) {
       toast.error(`Only ${selectedStock} left in stock`);
       return;
