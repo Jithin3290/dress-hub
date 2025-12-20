@@ -31,9 +31,9 @@ function Notification() {
       }
     };
 
-    ws.onerror = (err) => {
-      console.error("❌ WS ERROR", err);
-    };
+    // ws.onerror = (err) => {
+    //   console.error("❌ WS ERROR", err);
+    // };
 
     return () => {
       ws.close();
